@@ -1,3 +1,6 @@
+#ifndef MIPS_TYPES_H
+#define MIPS_TYPES_H
+
 /////////////////////////////////////////////////////////////////////////
 // Standard Haste Types:
 /* USintn : unsigned integers of n bits */
@@ -23,8 +26,8 @@
 
 /////////////////////////////////////////////////////////////////////////
 // MIPS Types:
-& addr_type =type word32
-& data_type =type word32
+& addr_type =type [0..4294967295]
+& data_type =type [0..4294967295]
 & reg_type =type <<B,B,B,B,B>>
 
 // D to E: SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite, ALUCtrl[2:0], ALUSrc, RegDst
@@ -37,7 +40,7 @@
 & e2m_type =type <<word32, word32, reg_type, B, B, B>>
 
 // F to D: Inst, PCPlus4
-& f2d_type =type <<word32, word32>>
+& f2d_type =type <<data_type, addr_type>>
 
 // M to D: ALUOut (the addr of mem rd/wr)
 & m2d_type =type <<word32>>
@@ -53,3 +56,5 @@
 
 // W to E: Result
 & w2e_type =type <<word32>>
+
+#endif // MIPS_TYPES_H
