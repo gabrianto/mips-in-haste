@@ -1,0 +1,55 @@
+/////////////////////////////////////////////////////////////////////////
+// Standard Haste Types:
+/* USintn : unsigned integers of n bits */
+& USint1 =type [0..1]
+& USint2 =type [0..3]
+& USint3 =type [0..7]
+& USint4 =type [0..15]
+& USint8 =type [0..255]
+& USint16 =type [0..65535]
+/* TCintn : two's complement signed integers of n bits */
+& TCint1 =type [-1..0]
+& TCint2 =type [-2..1]
+& TCint3 =type [-4..3]
+& TCint4 =type [-8..7]
+& TCint8 =type [-128..127]
+& TCint16 =type [-32768..32767]
+/* aliases for 4/8/16/32-bit boolean vectors */
+& B =type bool
+& nibble =type <<B,B,B,B>>
+& byte =type <<B,B,B,B,B,B,B,B>>
+& word16 =type <<B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B>>
+& word32 =type <<B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B>>
+
+/////////////////////////////////////////////////////////////////////////
+// MIPS Types:
+& addr_type =type word32
+& data_type =type word32
+& reg_type =type <<B,B,B,B,B>>
+
+// D to E: SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite, ALUCtrl[2:0], ALUSrc, RegDst
+& d2e_type =type <<word32, word32, reg_type, reg_type, reg_type, word32, byte>>
+
+// D to F: PCSrc, PCBranch
+& d2f_type =type <<B, word32>>
+
+// E to M: ALUOut, WriteData, WriteReg, RegWrite, MemToReg, MemWrite
+& e2m_type =type <<word32, word32, reg_type, B, B, B>>
+
+// F to D: Inst, PCPlus4
+& f2d_type =type <<word32, word32>>
+
+// M to D: ALUOut (the addr of mem rd/wr)
+& m2d_type =type <<word32>>
+
+// M to E: ALUOut (the addr of mem rd/wr)
+& m2e_type =type <<word32>>
+
+// M to W: ReadData, ALUOut, WriteReg, RegWrite, MemToReg
+& m2w_type =type <<word32, word32, reg_type, B, B>>
+
+// W to D: Result, WriteReg
+& w2d_type =type <<word32, reg_type>>
+
+// W to E: Result
+& w2e_type =type <<word32>>
