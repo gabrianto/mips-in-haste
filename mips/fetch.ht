@@ -2,17 +2,28 @@
 
 & fetch : export proc(d2f?chan d2f_type & f2d!chan f2d_type &
                       IM_CLK!wire bool & 
-                      IM_ADDR?wire addr_type & 
+                      IM_ADDR!wire addr_type & 
                       IM_DATA?wire data_type &
                       IM_VALID?wire bool) .
 begin
-  im_clk     : var bool      ff := 0
-& im_addr    : var addr_type ff := 0
-& im_data    : var data_type ff := 0
-& im_valid   : var bool      ff := 0
+  im_clk     : var bool      ff := false
+& im_addr    : var addr_type ff := 0 
+& im_data    : var data_type ff := 0 
+& im_valid   : var bool      ff := false
 & IM_CLK     : wire bool        := im_clk
 & IM_ADDR    : wire addr_type   := im_addr
+& pc_next    : var addr_type ff := 0 
 |
    forever do
+      im_addr := pc_next ;
+      (  
+	 im_clk := true;
+         posedge(IM_VALID);
+         im_data := sample(IM_DATA);
+	 im_clk := false 
+      ) || 
+      pc_next := im_addr + 4 ;
+
+      f2d!<<im_data, pc_next>>
    od
 end
