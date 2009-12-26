@@ -1,0 +1,9 @@
+#include "types.ht"
+
+& writeback : export proc(m2w?chan m2w_type & w2d!chan w2d_type &
+                          w2e!chan w2e_type) .
+begin
+|
+   forever do
+   od
+end
