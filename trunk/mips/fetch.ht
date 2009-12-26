@@ -25,5 +25,6 @@ begin
       pc_next := im_addr + 4 ;
 
       f2d!<<im_data, pc_next>>
+      // TODO: need to get data from D and use as a MUX ... on next PC
    od
 end
