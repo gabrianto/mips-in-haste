@@ -1,8 +1,8 @@
-#summary One-sentence summary of this page.
+#summary Design considerations for the Asynchronous MIPS.
 
 = Introduction =
 
-Design considerations for the Asynchronous MIPS.
+In this page we intend to list our design key points and trade-offs
 
 = Details =
 
