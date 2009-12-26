@@ -6,7 +6,8 @@
                        DM_WE!wire bool &           
                        DM_ADDR!wire addr_type &    
                        DM_WR_DATA!wire data_type & 
-                       DM_RD_DATA?wire data_type) .
+                       DM_RD_DATA?wire data_type &
+                       DM_RD_VALID?wire bool) .
 begin
 // output signals - needs a shadow register internally
 & dm_clk     : var bool      ff := 0
@@ -18,7 +19,8 @@ begin
 & DM_ADDR    : wire addr_type := dm_addr
 & DM_WR_DATA : wire data_type := dm_wr_data
 // input signals are sampled into FF
-& dm_rd_data : var data_type ff : 0
+& dm_rd_data  : var data_type ff := 0
+& dm_rd_valid : var bool      ff := 0
 |
    forever do
    od
