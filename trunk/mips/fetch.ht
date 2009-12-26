@@ -1,0 +1,16 @@
+#include "types.ht"
+
+& fetch : export proc(d2f?chan d2f_type & f2d!chan f2d_type &
+                      IM_CLK!wire bool & 
+                      IM_DATA?wire data_type & 
+                      IM_DATA?wire data_type) .
+begin
+  im_clk     : var bool      ff := 0
+& im_addr    : var addr_type ff := 0
+& IM_CLK     : wire bool      := im_clk
+& IM_ADDR    : wire addr_type := im_addr
+& im_data    : var data_type ff : 0
+|
+   forever do
+   od
+end
