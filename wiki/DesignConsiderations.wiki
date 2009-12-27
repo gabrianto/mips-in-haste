@@ -9,12 +9,19 @@ In this page we intend to list our design key points and trade-offs
 Open Issues:
 
 1. How to generate all the Hazard logic without common synch logic?
-	a. Data Dependency Hazards: it seems that we can reproduce the logic by adding the following internal states into the execute logic to store the following data for 2 previous executions:
+	a. RAW (Read after Write) Data Dependency Hazards: it seems that we can reproduce the logic by adding the following internal states into the execute logic to store the following data for 2 previous executions:
            "WriteReg" - the register the result to be written into 
            "RegWrite" - the control signal that say a register will be written
            "Result" - the execution result.
            When obtaining new command to execute the execution should look to see if any of the source registers match the previous, and if that previous was about to be written and then use the stored result as a "bypass"
+        b. Data Hazards from memory load 
+           We have several options fixing the hazard in Exe or Decode.
+           Anyway we will need to stall (1 or 2 cycles respectively). 
+           
+           We can share the implementation with the RAW for matching registers.
 
+           NOTE: we must allow write into RF not depending on the Decode ability to progress 
+  
 	b. Branch Hazards
 
 2. How to design the "instruction memory" interface? 
@@ -34,5 +41,3 @@ Open Issues:
 
 3. Register File design:
    For design minimalization we use the Haste regmem structure even tough we will need to enhance it to perform the 1W2R during same cycle. The implementation relies on the async behavior so we can schedule the write, read, read (if needed) as sequence of tasks. We could make the HW faster by implementing the regfile from latches and adding muxes etc.
-
-
