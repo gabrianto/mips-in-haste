@@ -1,0 +1,25 @@
+#summary Describing how RAW Hazards are resolved
+
+= Introduction =
+
+Detailed Implementation
+
+= Details =
+
+All changes are in execute
+
+Added State:
+In Exe
+Add 2 levels of memory pipe registers holding two previous cycles data:
+* RegWrite - the control telling they result of that cycle will be written to Reg
+* WriteReg[4:0] - the register to be written
+* ALUOut - the result that would be written into that Reg
+
+Added Logic:
+
+For each of the two lines:
+If stored RegWrite and Rs || Rt == Compare stored WriteReg 
+Take the result from the relevant matching.
+
+How to schedule register file write then read:
+- We need to count the number of feed in data into the pipe so when there is data in it we will wait for the write data in Decode to be provided by WriteBack. 
