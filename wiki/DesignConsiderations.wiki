@@ -22,7 +22,17 @@ Open Issues:
 
 	b. We can let the environment set the clock and we will just change read address and read previous data on clock fall
 
+   Resolution: as we are asked ot meet synchronous environment we will implement option b.
+
+
 3. How to design the "data memory" interface ?
 	a. Use a delay line and a "valid" signal - in that case we drive the clock and wait for "valid" before we read in the data
 
 	b. Let the environment drive the clock and we only change the read address and read the data on clock fall
+
+   Resolution: as we are asked ot meet synchronous environment we will implement option b.
+
+3. Register File design:
+   For design minimalization we use the Haste regmem structure even tough we will need to enhance it to perform the 1W2R during same cycle. The implementation relies on the async behavior so we can schedule the write, read, read (if needed) as sequence of tasks. We could make the HW faster by implementing the regfile from latches and adding muxes etc.
+
+
