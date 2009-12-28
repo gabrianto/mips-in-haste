@@ -1,8 +1,12 @@
-
+ifndef DES
 DES=mips
+endif
+
 VPATH=../mips ../test
 
 all: compile dot map sim view 
+
+fetch_top.hcl: fetch_top.ht fetch.ht types.ht
 
 compile: $(DES).hcl
 
@@ -12,7 +16,7 @@ compile: $(DES).hcl
 map: $(DES)_sim.v 
 
 %_sim.v: %.hcl
-	htmap -mon -tech generic -input $< $*
+	htmap -mon -tech generic -ConstPins -input $< $*
 
 dot: $(DES).dot
 
@@ -29,5 +33,5 @@ view: $(DES).vxl
 
 clean:
 	- \rm *_sim.v *.hcl *_htmap.v *_mon.v *_netlist.v *.paths verilog.*
-	- \rm async_lib_generic.v *.vxl
-	- \rm -rf log hss rpt rundir
+	- \rm async_lib_generic.v *.vxl HT_simulation_models.v
+	- \rm -rf log hss rpt rundir *.dot *.trn *.vcd *.dsn
