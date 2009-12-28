@@ -1,0 +1,24 @@
+//
+//  This is the fetch container for testing 
+//
+
+#include "../mips/types.ht"
+#include "../mips/fetch.ht"
+
+& fetch : proc(d2f?chan d2f_type & f2d!chan f2d_type &
+               IM_CLK?wire bool &
+               IM_ADDR!wire addr_type & 
+               IM_DATA?wire data_type) . import
+
+& fetch_top : main proc(
+                   d2f?chan d2f_type & f2d!chan f2d_type &
+		   IM_CLK?wire bool &          // read inst mem on that clk
+                   IM_ADDR!wire addr_type &    // inst mem address 
+                   IM_DATA?wire data_type &    // inst mem data 
+		   ) .
+begin
+|
+  // top level connectivity...
+  fetch(d2f, f2d, IM_CLK, IM_ADDR, IM_DATA)
+
+end
