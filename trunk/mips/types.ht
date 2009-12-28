@@ -34,7 +34,7 @@
 & d2e_type =type <<word32, word32, reg_type, reg_type, reg_type, word32, byte>>
 
 // D to F: PCSrc, PCBranch
-& d2f_type =type <<B, word32>>
+& d2f_type =type <<B, addr_type>>
 
 // E to M: ALUOut, WriteData, WriteReg, RegWrite, MemToReg, MemWrite
 & e2m_type =type <<word32, word32, reg_type, B, B, B>>

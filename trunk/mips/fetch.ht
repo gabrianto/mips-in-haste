@@ -1,24 +1,33 @@
 #include "types.ht"
 
-& fetch : export proc(d2f?chan d2f_type & f2d!chan f2d_type &
+& fetch : export proc(d2f?chan d2f_type & 
+	              f2d!chan f2d_type &
                       IM_CLK?wire bool & 
                       IM_ADDR!wire addr_type & 
                       IM_DATA?wire data_type) .
 begin
-  im_clk     : var bool      ff := false
 & im_addr    : var addr_type ff := 0 
 & im_data    : var data_type ff := 0 
 & IM_ADDR    : wire addr_type   := im_addr
-& pc_next    : var addr_type ff := 0 
+& pc_next    : var addr_type ff := 0
+& pc_branch  : var addr_type ff := 0     // decode provided next pc address
+& pc_src     : var bool      ff := false // feedback from decode
+& pos_branch : var bool      ff := false // possible branch (decode had work)
 |
    forever do
-      wait(-im_clk);
-      im_data := sample(IM_DATA);
-      pc_next := im_addr + 4 ;
-      im_addr := pc_next;
-      f2d!<<im_data, pc_next>>;
-      wait(im_clk);
-
-      // TODO: need to get data from D and use as a MUX ... on next PC
+	negedge(IM_CLK);
+         im_data := sample(IM_DATA);
+         im_data := IM_DATA;
+         if pos_branch then
+	   d2f?<<pc_src, pc_branch>>;
+	   pos_branch := false
+         else
+           pc_src := false
+         fi;
+         im_addr := if pc_src then pc_branch else pc_next fi;
+         pc_next := im_addr + 4 ;
+         f2d!<<im_data, pc_next>>;
+         posedge(IM_CLK);
+         pos_branch := true
    od
 end
