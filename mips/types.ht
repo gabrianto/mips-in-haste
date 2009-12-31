@@ -18,7 +18,7 @@
 & TCint8 =type [-128..127]
 & TCint16 =type [-32768..32767]
 /* aliases for 4/8/16/32-bit 1-bit data vectors */
-& B =type [0..1] // *** ALON CHANGE ***
+& B =type [0..1]
 & nibble =type <<B,B,B,B>>
 & byte =type <<B,B,B,B,B,B,B,B>>
 & word16 =type <<B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B>>
@@ -28,19 +28,18 @@
 // MIPS Types:
 & addr_type =type [0..4294967295]
 & data_type =type [0..4294967295]
-& reg_type =type <<B,B,B,B,B>>
+& reg_type  =type [0..31]
 & bts3  =type  <<B,B,B>>
 
 
 // D to E: SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite, ALUCtrl[2:0], ALUSrc, RegDst
-& d2e_type =type <<word32, word32, reg_type, reg_type, reg_type, word32, B, B,
-B, bts3, B, B>> // *** ALON CHANGE ***
+& d2e_type =type <<addr_type, addr_type, reg_type, reg_type, reg_type, addr_type, B, B,B, [0..7], B, B>>
 
 // D to F: PCSrc, PCBranch
-& d2f_type =type <<B, addr_type>>
+& d2f_type =type <<USint1, addr_type>>
 
 // E to M: ALUOut, WriteData, WriteReg, RegWrite, MemToReg, MemWrite
-& e2m_type =type <<word32, word32, reg_type, B, B, B>>
+& e2m_type =type <<word32, word32, reg_type, USint1, USint1, USint1>>
 
 // F to D: Inst, PCPlus4
 & f2d_type =type <<data_type, addr_type>>
@@ -52,10 +51,10 @@ B, bts3, B, B>> // *** ALON CHANGE ***
 & m2e_type =type <<word32>>
 
 // M to W: ReadData, ALUOut, WriteReg, RegWrite, MemToReg
-& m2w_type =type <<word32, word32, reg_type, B, B>>
+& m2w_type =type <<word32, word32, reg_type, USint1, USint1>>
 
 // W to D: Result, WriteReg
-& w2d_type =type <<word32, reg_type>>
+& w2d_type =type <<data_type, reg_type, USint1>>
 
 // W to E: Result
 & w2e_type =type <<word32>>
