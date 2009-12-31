@@ -1,11 +1,118 @@
 #include "types.ht"
 
+& func_type    =type [0..63]
+& op_type      =type [0..63]
+& aluctrl_type =type [0..7]
+
+& ctrl : proc (op?var op_type &
+               Func?var func_type &
+               RegWrite!var USint1 & 
+               MemToReg!var USint1 &
+               MemWrite!var USint1 &
+               ALUCtrl!var  aluctrl_type &
+               AluSrcIm!var USint1 &
+               RegDstRd!var USint1 &
+               Branch!var   USint1) .
+begin
+& AluOp : var [0..3]
+& Jump : var USint1
+| 
+<<RegWrite,RegDstRd,AluSrcIm,Branch,MemWrite,MemToReg,Jump,AluOp>> :=
+   case op 
+     is 0b000000 then <<1,1,0,0,0,0,0,2>> //Rtyp
+     or 0b100011 then <<1,0,1,0,0,1,0,0>> //LW
+     or 0b101011 then <<0,0,1,0,1,0,0,0>> //SW
+     or 0b000100 then <<0,0,0,1,0,0,0,1>> //BEQ
+     or 0b001000 then <<1,0,1,0,0,0,0,0>> //ADDI
+     or 0b000010 then <<0,0,0,0,0,0,1,0>> //J
+     else <<0,0,0,0,0,0,0,0>>
+   si;
+ 
+ALUCtrl := 
+   case AluOp
+     is 0b00 then 0b010       // add
+     or 0b01 then 0b110       // sub
+     else case Func           // RTYPE
+       is 0b100000 then 0b010 // ADD
+       or 0b100010 then 0b110 // SUB
+       or 0b100100 then 0b000 // AND
+       or 0b100101 then 0b001 // OR
+       or 0b101010 then 0b111 // SLT
+       else 0b000
+       si
+    si
+
+end // ctrl
+
 & decode : export proc(f2d?chan f2d_type & m2d?chan m2d_type & 
                        w2d?chan w2d_type &
                        d2f!chan d2f_type & d2e!chan d2e_type) . 
 begin
+// Control Signals
+& RegWrite : var USint1
+& MemToReg : var USint1
+& MemWrite : var USint1 
+& AluSrcIm : var USint1 
+& RegDstRd : var USint1 
+& Branch   : var USint1
+& ALUCtrl  : var aluctrl_type
+// Instruction fields
+& Op       : var op_type
+& Func     : var func_type
+& Rs       : var reg_type
+& Rt       : var reg_type
+& Rd       : var reg_type
+// Others
+& ALUOut_M   : var data_type
+& Result_W   : var data_type
+& WriteReg_W : var reg_type
+& RegWrite_W : var USint1
+& PCPlus4_F  : var addr_type
+& Inst_F     : var data_type
+& SignImmX4  : var addr_type
+& SignImm    : var addr_type
+// Out to Exe
+& SrcA    : var data_type
+& SrcB    : var data_type
+// Out to Fetch
+& PCBranch : var addr_type
+& PCBranchSrc : var USint16
+// Count outstanding data in pipe
+& OutInPipe : var USint4 ff := 0
+// Register File
+& RF : ramreg array [0..31] of data_type
 |
    forever do
-      skip
+      if outprobe(w2d) then
+         w2d?<<Result_W, WriteReg_W, RegWrite_W>>;
+         (OutInPipe := OutInPipe - 1) ||
+         (if boolvec(RegWrite_W).0 then RF[WriteReg_W] := Result_W fi)
+      fi;
+
+      if outprobe(f2d) * (OutInPipe < 3) then
+         f2d?<<Inst_F, PCPlus4_F>>;
+         ( 
+           <<Func, Rs, Rt, Rd>> := 
+            bitvec(Inst_F).31..11 cast <<func_type,reg_type,reg_type,reg_type>> ||
+           Op :=  bitvec(Inst_F).5..0 cast op_type ||
+           SignImmX4 := 
+             if boolvec(Inst_F).16
+                 then <<0b11111111111111, bitvec(Inst_F).15..0,0,0>> 
+                 else <<0b00000000000000, bitvec(Inst_F).15..0,0,0>> fi cast addr_type ||
+           SignImm := if boolvec(Inst_F).16
+                        then <<0b1111111111111111, bitvec(Inst_F).15..0>> 
+                        else <<0b0000000000000000, bitvec(Inst_F).15..0>> fi cast addr_type 
+         );
+         ctrl(Op, Func, 
+              RegWrite, MemToReg, MemWrite, ALUCtrl, AluSrcIm, RegDstRd, Branch);
+         d2f!<<Branch, PCPlus4_F + SignImmX4>> ||
+         (
+            SrcA := RF[Rs];
+            SrcB := RF[Rt];
+            d2e!<<SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite,
+                  ALUCtrl, AluSrcIm, RegDstRd>>;
+            OutInPipe := OutInPipe + 1
+         )
+      fi
    od
 end
