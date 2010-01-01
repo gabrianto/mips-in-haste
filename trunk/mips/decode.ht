@@ -19,25 +19,25 @@ begin
 | 
 <<RegWrite,RegDstRd,AluSrcIm,Branch,MemWrite,MemToReg,Jump,AluOp>> :=
    case op 
-     is 0b000000 then <<1,1,0,0,0,0,0,2>> //Rtyp
-     or 0b100011 then <<1,0,1,0,0,1,0,0>> //LW
-     or 0b101011 then <<0,0,1,0,1,0,0,0>> //SW
-     or 0b000100 then <<0,0,0,1,0,0,0,1>> //BEQ
-     or 0b001000 then <<1,0,1,0,0,0,0,0>> //ADDI
-     or 0b000010 then <<0,0,0,0,0,0,1,0>> //J
+     is MIPS_OP_RTYPE then <<1,1,0,0,0,0,0,2>> 
+     or MIPS_OP_LW    then <<1,0,1,0,0,1,0,0>> 
+     or MIPS_OP_SW    then <<0,0,1,0,1,0,0,0>> 
+     or MIPS_OP_BEQ   then <<0,0,0,1,0,0,0,1>> 
+     or MIPS_OP_ADDI  then <<1,0,1,0,0,0,0,0>> 
+     or MIPS_OP_J     then <<0,0,0,0,0,0,1,0>> 
      else <<0,0,0,0,0,0,0,0>>
    si;
  
 ALUCtrl := 
    case AluOp
-     is 0b00 then 0b010       // add
-     or 0b01 then 0b110       // sub
+     is 0b00 then ALU_CTRL_ADD
+     or 0b01 then ALU_CTRL_SUB
      else case Func           // RTYPE
-       is 0b100000 then 0b010 // ADD
-       or 0b100010 then 0b110 // SUB
-       or 0b100100 then 0b000 // AND
-       or 0b100101 then 0b001 // OR
-       or 0b101010 then 0b111 // SLT
+       is 0b100000 then ALU_CTRL_ADD
+       or 0b100010 then ALU_CTRL_SUB
+       or 0b100100 then ALU_CTRL_AND
+       or 0b100101 then ALU_CTRL_OR
+       or 0b101010 then ALU_CTRL_SLT
        else 0b000
        si
     si
