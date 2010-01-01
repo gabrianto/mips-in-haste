@@ -25,13 +25,90 @@
 & word32 =type <<B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B>>
 
 /////////////////////////////////////////////////////////////////////////
-// MIPS Types:
+// MIPS ARCHITECTURE Types and Consts
+
+// Memory is space 32 bit
 & addr_type =type [0..4294967295]
+
+// Memory word is 32 bit
 & data_type =type [0..4294967295]
+
+// There are 32 registers
 & reg_type  =type [0..31]
+
+// Operations are 3 bit
 & bts3  =type  <<B,B,B>>
 
+// OPERATIONS TABLE
+//------------------
+// CONST           VALUE              DESCRIPTION                 OPERATION
+& MIPS_OP_RTYPE =  const 0b000000 //  all R-type instructions   | see Func Table Below
+& MIPS_OP_BLTZ_BGEZ = const 0b000001 //  branch less than zero/ | if ([rs] < 0) PC = BTA/
+//                     (rt = 0/1)        branch >= to zero      | if ([rs] >= 0) PC = BTA
+& MIPS_OP_J =      const 0b000010 //  jump PC = JTA             | PC = JTA
+& MIPS_OP_JAL =    const 0b000011 //  jump and link             | $ra = PC+4, PC = JTA
+& MIPS_OP_BEQ =    const 0b000100 //  branch if equal           | if ([rs]==[rt]) PC = BTA
+& MIPS_OP_BNE =    const 0b000101 //  branch if not equal       | if ([rs]!=[rt]) PC = BTA
+& MIPS_OP_BLEZ =   const 0b000110 //  branch if <= to zero      | if ([rs] <= 0) PC = BTA
+& MIPS_OP_BGTZ =   const 0b000111 //  branch if > zero          | if ([rs] > 0) PC = BTA
+& MIPS_OP_ADDI =   const 0b001000 //  add immediate             | [rt] = [rs] + SignImm
+& MIPS_OP_ADDIU =  const 0b001001 //  add immediate unsigned    | [rt] = [rs] + SignImm
+& MIPS_OP_SLTI =   const 0b001010 //  set < immediate           | [rs] < SignImm ? [rt]=1 : [rt]=0
+& MIPS_OP_SLTIU =  const 0b001011 //  set < immediate unsigned  | [rs] < SignImm ? [rt]=1 : [rt]=0
+& MIPS_OP_ANDI =   const 0b001100 //  and immediate             | [rt] = [rs] & ZeroImm
+& MIPS_OP_ORI =    const 0b001101 //  or immediate              | [rt] = [rs] | ZeroImm
+& MIPS_OP_XORI =   const 0b001110 //  xor immediate             | [rt] = [rs] = ZeroImm
+& MIPS_OP_LUI =    const 0b001111 //  load upper immediate      | [rt] = {Imm, 16'b0}
+& MIPS_OP_MFTC0 =  const 0b010000 //  move from/to coprocessor 0| [rt] = [rd]/[rd] = [rt]
+// (rs = 0/4) mfc0/mtc0                                         | (rd is in coprocessor 0)
+& MIPS_OP_F_TYPE = const 0b010001 //  fop = 16/17: F-type       | see Fop Table Below
+& MIPS_OP_BC1F_BC1T = const 0b010001 // fop = 8: branch if      | if (fpcond == 0) PC = BTA/
+// (rt = 0/1) bclf/bclt                 fpcond is FALSE/TRUE    | if (fpcond == 1) PC = BTA
+& MIPS_OP_LB =    const 0b100000 //  load byte                  | [rt] = SignExt ([Address]7:0)
+& MIPS_OP_LH =    const 0b100001 //  load halfword              | [rt] = SignExt ([Address]15:0)
+& MIPS_OP_LW =    const 0b100011 //  load word                  | [rt] = [Address]
+& MIPS_OP_LBU =   const 0b100100 //  load byte unsigned         | [rt] = ZeroExt ([Address]7:0)
+& MIPS_OP_LHU =   const 0b100101 //  load halfword unsigned     | [rt] = ZeroExt ([Address]15:0)
+& MIPS_OP_SB =    const 0b101000 //  store byte                 | [Address]7:0 = [rt]7:0
+& MIPS_OP_SH =    const 0b101001 //  store halfword             | [Address]15:0 = [rt]15:0
+& MIPS_OP_SW =    const 0b101011 //  store word                 | [Address] = [rt]
+& MIPS_OP_LWC1 =  const 0b110001 //  load word to FP coproc 1   | [ft] = [Address]
+& MIPS_OP_SWC1 =  const 0b111001 //  store word to FP coproc 1  | [Address] = [ft]
 
+// RTYPE FUNCTIONS TABLE
+//-----------------------
+// CONST             VALUE          // DESCRIPTION             | OPERATION
+& MIPS_FUNC_SLL =    const 0b000000 // shift left logical      | [rd] = [rt] << shamt
+& MIPS_FUNC_SRL =    const 0b000010 // shift right logical     | [rd] = [rt] >> shamt
+& MIPS_FUNC_SRA =    const 0b000011 // shift right arithmetic  | [rd] = [rt] >>> shamt
+& MIPS_FUNC_SLLV =   const 0b000100 // shift left logical var  | [rd] = [rt] << [rs]4:0
+& MIPS_FUNC_SRLV =   const 0b000110 // shift right logical var | [rd] = [rt] >> [rs]4:0
+& MIPS_FUNC_SRAV =   const 0b000111 // shift right arithmetic  | [rd] = [rt] >>> [rs]4:0
+& MIPS_FUNC_JR =     const 0b001000 // jump register           | PC = [rs]
+& MIPS_FUNC_JALR =   const 0b001001 // jump and link register  | $ra = PC + 4, PC = [rs]
+& MIPS_FUNC_SYSCALL =const 0b001100 // system call             | system call exception
+& MIPS_FUNC_BREAK =  const 0b001101 // break                   | break exception
+& MIPS_FUNC_MFHI =   const 0b010000 // move from hi            | [rd] = [hi]
+& MIPS_FUNC_MTHI =   const 0b010001 // move to hi              | [hi] = [rs]
+& MIPS_FUNC_MFLO =   const 0b010010 // move from lo            | [rd] = [lo]
+& MIPS_FUNC_MTLO =   const 0b010011 // move to lo              | [lo] = [rs]
+& MIPS_FUNC_MULT =   const 0b011000 // multiply                | {[hi], [lo]} = [rs] * [rt]
+& MIPS_FUNC_MULTU =  const 0b011001 // multiply unsigned       | {[hi], [lo]} = [rs] * [rt]
+& MIPS_FUNC_DIV =    const 0b011010 // divide                  | [lo] = [rs]/[rt],[hi] = [rs]%[rt]
+& MIPS_FUNC_DIVU =   const 0b011011 // divide unsigned         | [lo] = [rs]/[rt],[hi] = [rs]%[rt]
+& MIPS_FUNC_ADD =    const 0b100000 // add                     | [rd] = [rs] + [rt]
+& MIPS_FUNC_ADDU =   const 0b100001 // add unsigned            | [rd] = [rs] + [rt]
+& MIPS_FUNC_SUB =    const 0b100010 // subtract                | [rd] = [rs] - [rt]
+& MIPS_FUNC_SUBU =   const 0b100011 // subtract unsigned       | [rd] = [rs] - [rt]
+& MIPS_FUNC_AND =    const 0b100100 // and                     | [rd] = [rs] & [rt]
+& MIPS_FUNC_OR =     const 0b100101 // or                      | [rd] = [rs] | [rt]
+& MIPS_FUNC_XOR =    const 0b100110 // xor                     | [rd] = [rs] = [rt]
+& MIPS_FUNC_NOR =    const 0b100111 // nor                     | [rd] = ~([rs] | [rt])
+& MIPS_FUNC_SLT =    const 0b101010 // set less than           | [rs] < [rt] ? [rd] = 1 : [rd] = 0
+& MIPS_FUNC_SLTU =   const 0b101011 // set less than unsigned  | [rs] < [rt] ? [rd] = 1 : [rd] = 0
+
+/////////////////////////////////////////////////////////////////////////
+// Top Level Channels
 // D to E: SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite, ALUCtrl[2:0], ALUSrc, RegDst
 & d2e_type =type <<addr_type, addr_type, reg_type, reg_type, reg_type, addr_type, B, B,B, [0..7], B, B>>
 
