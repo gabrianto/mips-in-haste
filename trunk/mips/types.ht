@@ -136,4 +136,14 @@
 // W to E: Result
 & w2e_type =type <<word32>>
 
+/////////////////////////////////////////////////////////////////////////
+// Internal Cross Module Constants
+
+// ALU CONTROL VALUES
+& ALU_CTRL_ADD = const 0b010
+& ALU_CTRL_SUB = const 0b110
+& ALU_CTRL_AND = const 0b000
+& ALU_CTRL_OR  = const 0b001
+& ALU_CTRL_SLT = const 0b111
+
 #endif // MIPS_TYPES_H
