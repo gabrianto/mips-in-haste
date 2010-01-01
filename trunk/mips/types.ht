@@ -37,7 +37,7 @@
 & reg_type  =type [0..31]
 
 // Operations are 3 bit
-& bts3  =type  <<B,B,B>>
+& bts3  =type  [0..7] // *** ALON CHANGE ***
 
 // OPERATIONS TABLE
 //------------------
@@ -110,13 +110,13 @@
 /////////////////////////////////////////////////////////////////////////
 // Top Level Channels
 // D to E: SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite, ALUCtrl[2:0], ALUSrc, RegDst
-& d2e_type =type <<addr_type, addr_type, reg_type, reg_type, reg_type, addr_type, B, B,B, [0..7], B, B>>
+& d2e_type =type <<data_type, data_type, reg_type, reg_type, reg_type, addr_type, B, B,B, [0..7], B, B>>
 
 // D to F: PCSrc, PCBranch
 & d2f_type =type <<USint1, addr_type>>
 
 // E to M: ALUOut, WriteData, WriteReg, RegWrite, MemToReg, MemWrite
-& e2m_type =type <<word32, word32, reg_type, USint1, USint1, USint1>>
+& e2m_type =type <<addr_type, data_type, reg_type, USint1, USint1, USint1>>
 
 // F to D: Inst, PCPlus4
 & f2d_type =type <<data_type, addr_type>>
@@ -127,10 +127,10 @@
 // M to E: ALUOut (the addr of mem rd/wr)
 & m2e_type =type <<word32>>
 
-// M to W: ReadData, ALUOut, WriteReg, RegWrite, MemToReg
-& m2w_type =type <<word32, word32, reg_type, USint1, USint1>>
+// M to W: ALUOut, WriteReg, RegWrite, MemToReg
+& m2w_type =type <<data_type, reg_type, USint1, USint1>>
 
-// W to D: Result, WriteReg
+// W to D: Result, WriteReg, RegWrite
 & w2d_type =type <<data_type, reg_type, USint1>>
 
 // W to E: Result
