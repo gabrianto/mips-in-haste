@@ -2,24 +2,42 @@
 
 & memory : export proc(e2m?chan e2m_type & m2w!chan m2w_type &
                        m2d!chan m2d_type & m2e!chan m2e_type &
-                       DM_CLK?wire bool &           
-                       DM_WE!wire bool &           
-                       DM_ADDR!wire addr_type &    
-                       DM_WR_DATA!wire data_type & 
-                       DM_RD_DATA?wire data_type) .
+                       MM_CLK?wire USint1 &           
+                       MM_WE!wire USint1 &           
+                       MM_ADDR!wire addr_type &    
+                       MM_WR_DATA!wire data_type ) .
 begin
 // output signals - needs a shadow register internally
-& dm_we      : var bool      ff := false
-& dm_addr    : var addr_type ff := 0
-& dm_wr_data : var data_type ff := 0
-& DM_WE      : wire bool      := dm_we
-& DM_ADDR    : wire addr_type := dm_addr
-& DM_WR_DATA : wire data_type := dm_wr_data
+& mm_we      : var USint1      ff := 0
+& mm_addr    : var addr_type ff := 0
+& mm_wr_data : var data_type ff := 0
+& MM_WE      : wire USint1      := mm_we
+& MM_ADDR    : wire addr_type := mm_addr
+& MM_WR_DATA : wire data_type := mm_wr_data
 // input signals are sampled into FF
-& dm_clk     : var bool      ff := false
-& dm_rd_data  : var data_type ff := 0
+//& em_rd_data  : var data_type ff := 0
+//& em_rd_valid : var USint1      ff := false
+& e2m_ptr : var USint1	ff := 1
+& m2w_ptr : var USint1	ff := 0
+& e2m_ALUOut : var addr_type ff := 0 
+& e2m_WriteData: var data_type ff := 0 
+& e2m_WriteReg: var reg_type ff := 0
+& e2m_RegWrite: var USint1 ff := 0 
+& e2m_MemToReg: var USint1 ff := 0 
+& e2m_MemWrite: var USint1 ff := 0
+
 |
    forever do
-      skip
+   	e2m?<<e2m_ALUOut, e2m_WriteData, e2m_WriteReg, e2m_RegWrite, e2m_MemToReg, e2m_MemWrite>>; 
+   	negedge(MM_CLK);
+	mm_we := e2m_MemWrite ||
+	mm_addr := e2m_ALUOut ||
+	mm_wr_data := e2m_WriteData;
+	posedge(MM_CLK);
+//	negedge(MM_CLK);
+//	em_rd_data := sample(MM_RD_DATA);
+//	em_rd_valid := sample(MM_RD_VALID);
+	mm_we := 0;	// kill writes unless a new cmd comes in
+	m2w!<<e2m_ALUOut cast data_type, e2m_WriteReg, e2m_RegWrite, e2m_MemToReg>>;
    od
 end
