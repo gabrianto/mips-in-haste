@@ -17,15 +17,15 @@ begin
 & AluOp : var [0..3]
 & Jump : var USint1
 | 
-<<RegWrite,RegDstRd,AluSrcIm,Branch,MemWrite,MemToReg,Jump,AluOp>> :=
+[[RegWrite,RegDstRd,AluSrcIm,Branch,MemWrite,MemToReg,Jump,AluOp]] :=
    case op 
-     is MIPS_OP_RTYPE then <<1,1,0,0,0,0,0,2>> 
-     or MIPS_OP_LW    then <<1,0,1,0,0,1,0,0>> 
-     or MIPS_OP_SW    then <<0,0,1,0,1,0,0,0>> 
-     or MIPS_OP_BEQ   then <<0,0,0,1,0,0,0,1>> 
-     or MIPS_OP_ADDI  then <<1,0,1,0,0,0,0,0>> 
-     or MIPS_OP_J     then <<0,0,0,0,0,0,1,0>> 
-     else <<0,0,0,0,0,0,0,0>>
+     is MIPS_OP_RTYPE then [[1,1,0,0,0,0,0,2]] 
+     or MIPS_OP_LW    then [[1,0,1,0,0,1,0,0]] 
+     or MIPS_OP_SW    then [[0,0,1,0,1,0,0,0]] 
+     or MIPS_OP_BEQ   then [[0,0,0,1,0,0,0,1]] 
+     or MIPS_OP_ADDI  then [[1,0,1,0,0,0,0,0]] 
+     or MIPS_OP_J     then [[0,0,0,0,0,0,1,0]] 
+     else [[0,0,0,0,0,0,0,0]]
    si;
  
 ALUCtrl := 
@@ -80,39 +80,41 @@ begin
 // Count outstanding data in pipe
 & OutInPipe : var USint4 ff := 0
 // Register File
-& RF : ramreg array [0..31] of data_type
+& RF : ramreg array [0..31] of data_type := [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
 |
    forever do
       if outprobe(w2d) then
-         w2d?<<Result_W, WriteReg_W, RegWrite_W>>;
+         w2d?[[Result_W, WriteReg_W, RegWrite_W]];
          (OutInPipe := OutInPipe - 1) ||
          (if boolvec(RegWrite_W).0 then RF[WriteReg_W] := Result_W fi)
       fi;
 
-      if outprobe(f2d) * (OutInPipe < 3) then
-         f2d?<<Inst_F, PCPlus4_F>>;
+      if probe(f2d) * (OutInPipe < 3) then
+         f2d?[[Inst_F, PCPlus4_F]];
          ( 
-           <<Func, Rs, Rt, Rd>> := 
-            bitvec(Inst_F).31..11 cast <<func_type,reg_type,reg_type,reg_type>> ||
-           Op :=  bitvec(Inst_F).5..0 cast op_type ||
+           [[Rs, Rt, Rd]] := 
+            bitvec(Inst_F).11..25 cast [[reg_type,reg_type,reg_type]] ||
+           Op :=  bitvec(Inst_F).26..31 cast op_type ||
+           Func := bitvec(Inst_F).0..5 cast func_type ||
            SignImmX4 := 
              if boolvec(Inst_F).16
-                 then <<0b11111111111111, bitvec(Inst_F).15..0,0,0>> 
-                 else <<0b00000000000000, bitvec(Inst_F).15..0,0,0>> fi cast addr_type ||
+                 then [[0b11111111111111, bitvec(Inst_F).0..15,0,0]] 
+                 else [[0b00000000000000, bitvec(Inst_F).0..15,0,0]] fi cast addr_type ||
            SignImm := if boolvec(Inst_F).16
-                        then <<0b1111111111111111, bitvec(Inst_F).15..0>> 
-                        else <<0b0000000000000000, bitvec(Inst_F).15..0>> fi cast addr_type 
+                        then [[0b1111111111111111, bitvec(Inst_F).0..15]] 
+                        else [[0b0000000000000000, bitvec(Inst_F).0..15]] fi cast addr_type 
          );
          ctrl(Op, Func, 
               RegWrite, MemToReg, MemWrite, ALUCtrl, AluSrcIm, RegDstRd, Branch);
-         d2f!<<Branch, PCPlus4_F + SignImmX4>> ||
+         d2f![[Branch, PCPlus4_F + SignImmX4]] ||
          (
             SrcA := RF[Rs];
             SrcB := RF[Rt];
-            d2e!<<SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite,
-                  ALUCtrl, AluSrcIm, RegDstRd>>;
+            d2e![[SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite,
+                  ALUCtrl, AluSrcIm, RegDstRd]];
             OutInPipe := OutInPipe + 1
          )
-      fi
+      fi || if probe(m2d) then m2d?ALUOut_M fi
+
    od
 end
