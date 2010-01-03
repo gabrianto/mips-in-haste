@@ -19,14 +19,14 @@ begin
       im_data := sample(IM_DATA);
       im_data := IM_DATA;
       if boolvec(pos_branch).0 then
-         d2f?<<pc_src, pc_branch>>;
+         d2f?[[pc_src, pc_branch]];
          pos_branch := 0
       else
          pc_src := 0
       fi;
       im_addr := if boolvec(pc_src).0 then pc_branch else pc_next fi;
       pc_next := im_addr + 4 ;
-      f2d!<<im_data, pc_next>>;
+      f2d![[im_data, pc_next]];
       posedge(IM_CLK);
       pos_branch := 0
    od
