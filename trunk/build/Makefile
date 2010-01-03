@@ -7,7 +7,9 @@ VPATH=../mips ../test
 all: compile dot map sim view 
 
 fetch_top.hcl: fetch_top.ht fetch.ht types.ht
+decode_top.hcl: decode_top.ht decode.ht types.ht
 mips.hcl: mips.ht fetch.ht decode.ht execute.ht memory.ht writeback.ht types.ht
+decode_top.vxl : decode_top_tb.v decode_top_sim.v dec_mem.list
 
 compile: $(DES).hcl
 
@@ -27,7 +29,7 @@ dot: $(DES).dot
 sim: $(DES).vxl
 
 %.vxl: %_tb.v %_sim.v
-	verilog $^ < /dev/null
+	verilog $(filter %.v, $^) < /dev/null
 
 view: $(DES).vxl
 	htview  $(DES)
