@@ -15,13 +15,13 @@ begin
 & w2m_MemToReg: var USint1 ff := 0 
 |
    forever do
-   	m2w?<<w2m_ALUOut, w2m_WriteReg, w2m_RegWrite, w2m_MemToReg>>;
+   	m2w?[[w2m_ALUOut, w2m_WriteReg, w2m_RegWrite, w2m_MemToReg]];
 	negedge(WM_CLK);
    	wm_rd_data := sample(WM_RD_DATA);
 	wm_rd_valid := sample(WM_RD_VALID);
 	// mux and write back
 	posedge(WM_CLK);
-	w2d!<<if (w2m_MemToReg = 1) then wm_rd_data else w2m_ALUOut fi,
-	w2m_WriteReg, w2m_RegWrite>>;
+	w2d![[if (w2m_MemToReg = 1) then wm_rd_data else w2m_ALUOut fi,
+	w2m_WriteReg, w2m_RegWrite]];
    od
 end
