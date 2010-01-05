@@ -44,9 +44,11 @@ ALUCtrl :=
 
 end // ctrl
 
-& decode : export proc(f2d?chan f2d_type & m2d?chan m2d_type & 
+& decode : export proc(f2d?chan f2d_type & 
+                       m2d?chan m2d_type & 
                        w2d?chan w2d_type &
-                       d2f!chan d2f_type & d2e!chan d2e_type) . 
+                       d2f!chan d2f_type & 
+                       d2e!chan d2e_type) . 
 begin
 // Control Signals
 & RegWrite : var USint1
@@ -74,22 +76,17 @@ begin
 // Out to Exe
 & SrcA    : var data_type
 & SrcB    : var data_type
-// Out to Fetch
-& PCBranch : var addr_type
-& PCBranchSrc : var USint16
 // Count outstanding data in pipe
 & OutInPipe : var USint4 ff := 0
 // Register File
 & RF : ramreg array [0..31] of data_type := [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
 |
    forever do
-      if outprobe(w2d) then
+      sel probe(w2d) then
          w2d?[[Result_W, WriteReg_W, RegWrite_W]];
-         (OutInPipe := OutInPipe - 1) ||
+         (OutInPipe := (OutInPipe - 1) fit USint4) ||
          (if boolvec(RegWrite_W).0 then RF[WriteReg_W] := Result_W fi)
-      fi;
-
-      if probe(f2d) * (OutInPipe < 3) then
+      or probe(f2d) * (OutInPipe < 2) then
          f2d?[[Inst_F, PCPlus4_F]];
          ( 
            [[Rs, Rt, Rd]] := 
@@ -106,15 +103,12 @@ begin
          );
          ctrl(Op, Func, 
               RegWrite, MemToReg, MemWrite, ALUCtrl, AluSrcIm, RegDstRd, Branch);
-         d2f![[Branch, PCPlus4_F + SignImmX4]] ||
+         d2f![[Branch, (PCPlus4_F + SignImmX4) fit addr_type]] ||
          (
-            SrcA := RF[Rs];
-            SrcB := RF[Rt];
+            (SrcA := RF[Rs]; SrcB := RF[Rt]) || OutInPipe := (OutInPipe + 1) fit USint4;
             d2e![[SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite,
-                  ALUCtrl, AluSrcIm, RegDstRd]];
-            OutInPipe := OutInPipe + 1
+                  ALUCtrl, AluSrcIm, RegDstRd]] 
          )
-      fi || if probe(m2d) then m2d?ALUOut_M fi
-
+      les
    od
 end
