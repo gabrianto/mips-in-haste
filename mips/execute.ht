@@ -28,11 +28,9 @@ begin
 & ALUOut : var data_type	ff := 0 
 & WriteReg : var reg_type	ff := 0 cast reg_type
 
-& ALUCTRL = alias ALUCtrl cast [0..7]
-
 // m2e back pipe sampling related logic
-& m2e_data_1 : var word32	ff := 0 cast word32
-& m2e_data_2 : var word32	ff := 0 cast word32
+//& m2e_data_1 : var word32	ff := 0 cast word32
+//& m2e_data_2 : var word32	ff := 0 cast word32
 
 
  
@@ -51,11 +49,11 @@ begin
 				or ALU_CTRL_ADD then (((SrcA) + (SrcBE)) fit  data_type)
 				or ALU_CTRL_SUB then (((SrcAE) - (SrcBE)) fit  data_type)
 				else (if ((SrcAE) < (SrcBE)) then (1 cast data_type) else (0 cast data_type) fi)   //SLT
-			si;
+			si
 	) ||
 	WriteReg := if (RegDst = 1) then Rd else Rt fi;
    // write to next pipe stage
-   e2m![[ALUOut cast addr_type, SrcBtmp, WriteReg, RegWrite, MemToReg, MemWrite ]] ;
+   e2m![[ALUOut cast addr_type, SrcBtmp, WriteReg, RegWrite, MemToReg, MemWrite ]] 
    // execute topics:
    // 1. ALU operations  - DONE assuming unsigned arithmetic
    // 2. ALU input selection for immediates v.s. RtData - DONE
