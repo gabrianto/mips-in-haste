@@ -12,22 +12,15 @@ begin
 & pc_next    : var addr_type ff := 0
 & pc_branch  : var addr_type ff := 0     // decode provided next pc address
 & pc_src     : var USint1    ff := 0     // feedback from decode
-& pos_branch : var USint1    ff := 0     // possible branch (decode had work)
 |
    forever do
 	   negedge(IM_CLK);
-      im_data := sample(IM_DATA);
-      im_data := IM_DATA;
-      if boolvec(pos_branch).0 then
-         d2f?[[pc_src, pc_branch]];
-         pos_branch := 0
-      else
-         pc_src := 0
-      fi;
-      im_addr := if boolvec(pc_src).0 then pc_branch else pc_next fi;
-      pc_next := im_addr + 4 ;
-      f2d![[im_data, pc_next]];
-      posedge(IM_CLK);
-      pos_branch := 0
+      (im_data := IM_DATA) || (pc_next := (im_addr + 4) fit addr_type);
+      (
+         im_addr := if boolvec(pc_src).0 then pc_branch else pc_next fi;
+         f2d![[im_data, pc_next]];  
+         d2f?[[pc_src, pc_branch]]
+      ) || 
+      posedge(IM_CLK)
    od
 end
