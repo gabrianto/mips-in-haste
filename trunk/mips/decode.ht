@@ -44,11 +44,11 @@ ALUCtrl :=
 
 end // ctrl
 
-& decode : export proc(f2d?chan f2d_type & 
-                       m2d?chan m2d_type & 
-                       w2d?chan w2d_type &
-                       d2f!chan d2f_type & 
-                       d2e!chan d2e_type) . 
+& decode : proc(f2d?chan f2d_type & 
+                m2d?chan m2d_type & 
+                w2d?chan w2d_type &
+                d2f!chan d2f_type & 
+                d2e!chan d2e_type) . 
 begin
 // Control Signals
 & RegWrite : var USint1
@@ -82,7 +82,7 @@ begin
 & RF : ramreg array [0..31] of data_type := [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
 |
    forever do
-      sel probe(w2d) then
+      sel outprobe(w2d) then
          w2d?[[Result_W, WriteReg_W, RegWrite_W]];
          (OutInPipe := (OutInPipe - 1) fit USint4) ||
          (if boolvec(RegWrite_W).0 then RF[WriteReg_W] := Result_W fi)

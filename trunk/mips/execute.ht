@@ -4,7 +4,9 @@
 // d2e needs to be passive here!! input
 // m2e needs to be passive or non existant
 
-& execute : export proc(d2e?chan d2e_type & m2e?chan m2e_type & e2m!chan e2m_type) .
+& execute : proc(d2e?chan d2e_type & 
+                 m2e?chan m2e_type & 
+                 e2m!chan e2m_type) .
 
 // & execute : export proc(d2e?chan d2e_type & e2m!chan e2m_type) .  // temp one without m->e backchannel
 

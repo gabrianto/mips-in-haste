@@ -12,42 +12,11 @@
 #include "memory.ht"
 #include "writeback.ht"
 
-& fetch : proc(d2f?chan d2f_type & 
-               f2d!chan f2d_type &
-               IM_CLK?wire bool &
-               IM_ADDR!wire addr_type & 
-               IM_DATA?wire data_type) . import
-
-& decode : proc(f2d?chan f2d_type & 
-                m2d?chan m2d_type & 
-                w2d?chan w2d_type &
-                d2f!chan d2f_type & 
-                d2e!chan d2e_type) . import
-
-& execute : proc(d2e?chan d2e_type & 
-                 m2e?chan m2e_type &
-                 e2m!chan e2m_type) . import
-
-& memory : proc(e2m?chan e2m_type & 
-                m2w!chan m2w_type &
-                m2d!chan m2d_type & 
-                m2e!chan m2e_type &
-                MM_CLK?wire USint1 &           
-                MM_WE!wire USint1 &           
-                MM_ADDR!wire addr_type &    
-                MM_WR_DATA!wire data_type ) . import
-
-& writeback : proc(m2w?chan m2w_type & 
-                   w2d!chan w2d_type &
-                   w2e!chan w2e_type &
-                   WM_CLK?wire USint1 &
-                   WM_RD_DATA?wire data_type) . import
-
-& mips : main proc(IM_CLK?wire  bool &          // read inst mem on that clk
+& mips : main proc(IM_CLK?wire  bool &         // read inst mem on that clk
                    IM_ADDR!wire addr_type &    // inst mem address 
                    IM_DATA?wire data_type &    // inst mem data 
-                   DM_CLK?wire  USint1&          // data mem clk
-                   DM_WE!wire   USint1 &           // data mem write enable
+                   DM_CLK?wire  USint1&        // data mem clk
+                   DM_WE!wire   USint1 &       // data mem write enable
                    DM_ADDR!wire addr_type &    // data mem address  
                    DM_WR_DATA!wire data_type & // data mem write data
                    DM_RD_DATA?wire data_type & // data mem read data
@@ -62,12 +31,12 @@ begin
 & m2e : chan m2e_type 
 & m2w : chan m2w_type 
 & w2d : chan w2d_type
-& w2e : chan w2e_type
+//& w2e : chan w2e_type
 |
   // top level connectivity...
   fetch(d2f, f2d, IM_CLK, IM_ADDR, IM_DATA) ||
-  decode(f2d, m2d, w2d, d2f, d2e) ||
+  decode(f2d, m2d, w2d, d2f, d2e) || 
   execute(d2e, m2e, e2m) || 
-  memory(e2m, m2w, m2d, m2e, DM_CLK, DM_WE, DM_ADDR, DM_WR_DATA) ||
-  writeback(m2w, w2d, w2e, DM_CLK, DM_RD_DATA)
+  memory(e2m, m2w, m2d, m2e, DM_CLK, DM_WE, DM_ADDR, DM_WR_DATA) || 
+  writeback(m2w, w2d, DM_CLK, DM_RD_DATA)
 end

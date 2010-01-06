@@ -1,10 +1,10 @@
 #include "types.ht"
 
-& writeback : export proc(m2w?chan m2w_type & 
-                          w2d!chan w2d_type &
-                          w2e!chan w2e_type &
-                          WM_CLK?wire USint1 &
-                          WM_RD_DATA?wire data_type) .
+& writeback : proc(m2w?chan m2w_type & 
+                   w2d!chan w2d_type &
+//                 w2e!chan w2e_type &
+                   WM_CLK?wire USint1 &
+                   WM_RD_DATA?wire data_type) .
 begin
 // input signals are sampled into FF
 & wm_rd_data  : var data_type ff := 0
@@ -13,14 +13,17 @@ begin
 & w2m_RegWrite: var USint1 ff := 0
 & w2m_MemToReg: var USint1 ff := 0 
 & result      : var data_type
+& w_clk       : var bool ff := false
 |
    forever do
       m2w?[[w2m_ALUOut, w2m_WriteReg, w2m_RegWrite, w2m_MemToReg]];
-      negedge(WM_CLK);
-      wm_rd_data := sample(WM_RD_DATA);
+      wait(w_clk <> boolvec(WM_CLK).0);
+      w_clk := true;
+      wait(w_clk <> boolvec(WM_CLK).0);
+      w_clk := false;
+      wm_rd_data := WM_RD_DATA;
       // mux and write back
-      posedge(WM_CLK) ||
-      ( result := if boolvec(w2m_MemToReg).0 then wm_rd_data else w2m_ALUOut fi;
-      w2d![[result, w2m_WriteReg, w2m_RegWrite]])
+      result := if boolvec(w2m_MemToReg).0 then wm_rd_data else w2m_ALUOut fi;
+      w2d![[result, w2m_WriteReg, w2m_RegWrite]];
    od
 end
