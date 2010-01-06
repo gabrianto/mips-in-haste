@@ -19,7 +19,8 @@ module mips_test;
    reg  [31:0] data_mem [0:1023];
    
    initial begin
-      $readmemb("../test/memory.list", inst_mem); // the memory file
+      $readmemb("../test/inst_mem.list", inst_mem); // the memory file
+      $readmemb("../test/data_mem.list", data_mem); // the memory file
    end
 
    mips mips(.Z_R(reset__R),
