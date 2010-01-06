@@ -1,13 +1,13 @@
 #include "types.ht"
 
-& memory : export proc(e2m?chan e2m_type & 
-                       m2w!chan m2w_type &
-                       m2d!chan m2d_type & 
-                       m2e!chan m2e_type &
-                       MM_CLK?wire USint1 &           
-                       MM_WE!wire USint1 &           
-                       MM_ADDR!wire addr_type &    
-                       MM_WR_DATA!wire data_type ) .
+& memory : proc(e2m?chan e2m_type & 
+                m2w!chan m2w_type &
+                m2d!chan m2d_type & 
+                m2e!chan m2e_type &
+                MM_CLK?wire USint1 &           
+                MM_WE!wire USint1 &           
+                MM_ADDR!wire addr_type &    
+                MM_WR_DATA!wire data_type ) .
 begin
 // output signals - needs a shadow register internally
 & mm_we      : var USint1      ff := 0
@@ -26,7 +26,6 @@ begin
 & e2m_RegWrite: var USint1 ff := 0 
 & e2m_MemToReg: var USint1 ff := 0 
 & e2m_MemWrite: var USint1 ff := 0
-
 |
    forever do
  //  	if outprobe (e2m) then
