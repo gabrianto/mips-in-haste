@@ -19,7 +19,7 @@ module mips_test;
    reg  [31:0] data_mem [0:1023];
    
    initial begin
-      $readmemb("../test/inst_mem.list", inst_mem); // the memory file
+      $readmemb("./inst_mem.list", inst_mem); // the memory file
       $readmemb("../test/data_mem.list", data_mem); // the memory file
    end
 
@@ -41,7 +41,7 @@ module mips_test;
    // monitoring result
    initial
      begin
-	     #20 $display("             Time   | CLK | IM_ADDR    | IM_DATA    | DM_WE | DM_ADDR    | DM_WR_DATA DM_RD_DATA |");
+	     #20 $display("             Time   | CLK | IM_ADDR    | IM_DATA    | DM_WE | DM_ADDR    | DM_WR_DATA | DM_RD_DATA |");
 	         $display("             ====== | === | ========== | ========== | ===== | ========== | ========== |");
         
 	     $monitor($time,"| 0x%x | 0x%x | 0x%x |  0x%x  | 0x%x | 0x%x | 0x%x |",
