@@ -5,11 +5,6 @@
 #include "../mips/types.ht"
 #include "../mips/fetch.ht"
 
-& fetch : proc(d2f?chan d2f_type & f2d!chan f2d_type &
-               IM_CLK?wire bool &
-               IM_ADDR!wire addr_type & 
-               IM_DATA?wire data_type) . import
-
 & fetch_top : main proc(
                    d2f?chan d2f_type & f2d!chan f2d_type &
 		   IM_CLK?wire bool &          // read inst mem on that clk
