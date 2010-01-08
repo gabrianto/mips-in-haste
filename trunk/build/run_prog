@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if test "$#" != 1; then
+   echo "Usage: $0 prog.mem"
+   echo "This command copies the program into local copy of inst_mem.list"
+   echo "and then run verilog and htview"
+   exit 1
+fi
+
+if test ! -e $1; then
+   echo "Could not find program $1"
+   exit 1
+fi
+
+cp -f $1 ./inst_mem.list
+pname=`echo $1 | sed 's/\(^\|.*\/\)\([^\/]*\)\.mem/\2/'`
+
+verilog ../test/mips_tb.v mips_sim.v < /dev/null | tee $pname.log | grep "|"
+rm -f ./inst_mem.list
+htview  -r mips.htview mips
+
