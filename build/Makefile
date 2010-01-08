@@ -30,6 +30,7 @@ dot: $(DES).dot
 sim: $(DES).vxl
 
 %.vxl: %_tb.v %_sim.v
+	\cp -f ../test/inst_mem.list ./inst_mem.list
 	verilog $(filter %.v, $^) < /dev/null
 
 view: $(DES).vxl
