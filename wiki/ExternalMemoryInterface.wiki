@@ -12,8 +12,3 @@ We had several options in designing the external memory interface.
 Since we intended to swap in the asynchronous MIPS into existing system we assumed the system has its own clock. 
 
 * our assumption is that the clock frequency is such that the memory output data is valid before the fall of the clock*
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
