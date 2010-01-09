@@ -34,7 +34,7 @@ module mips_test;
 	     $dumpfile("mips.vcd");
 	     $dumpvars(10, mips_test);
         
-	     #10000 $stop;
+	     #40000 $stop;
 	     $finish;
      end
 
@@ -58,20 +58,20 @@ module mips_test;
       // drive the f2d with consecutibe inputs from the memory
       forever
 	     begin
-           #200 CLK <= 1;
+           #100 CLK <= 1;
            IM_DATA  <= inst_mem[IM_ADDR>>2];
            if (DM_WE)
              begin
                 data_mem[DM_ADDR>>2] = DM_WR_DATA;
-                #200 CLK <= 0;
+                #100 CLK <= 0;
              end
            else
              begin 
-                #100 if (DM_ADDR > 8'hff)
+                #20 if (DM_ADDR > 8'hff)
                   DM_RD_DATA <= 32'hffffffff;
                 else
                   DM_RD_DATA <= data_mem[DM_ADDR>>2];
-                #200 CLK <= 0;
+                #80 CLK <= 0;
              end
 	     end
    end 
