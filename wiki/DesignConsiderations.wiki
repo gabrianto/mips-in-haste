@@ -8,8 +8,8 @@ In this page we reference the Wiki pages describing our design key points and tr
 
 We discuss the following points
 
-* [MemoryStageCycleTime	How Memory stage synchronize with Execute, Write-Back and External Memory]
-* [ExternalMemoryInterface How does the interface with external memory look like]
-* [RFWriteThenRead Decode Register File must not progress until the 3rd Write Back received]
-* [RAWHazards Describing how RAW Hazards are resolved]
-* [DataHazard How loading from memory into register will avoid hazards]	 
+   * [MemoryStageCycleTime	How Memory stage synchronize with Execute, Write-Back and External Memory]
+   * [ExternalMemoryInterface How does the interface with external memory look like]
+   * [RFWriteThenRead Decode Register File must not progress until the 3rd Write Back received]
+   * [RAWHazards Describing how RAW Hazards are resolved]
+   * [DataHazard How loading from memory into register will avoid hazards]	 
