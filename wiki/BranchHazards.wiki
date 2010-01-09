@@ -2,7 +2,7 @@
 
 = Problem =
 
-When a branch command is provided it pose 2 problems:
+When a branch command is provided it poses 2 problems:
    # The branch decision may be dependent on register values that are being calculated in exe, mem or wb
    # The fetcher may not continue new instructions until the resolution about the branch is made
 
