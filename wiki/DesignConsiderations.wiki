@@ -2,42 +2,14 @@
 
 = Introduction =
 
-In this page we intend to list our design key points and trade-offs
+In this page we reference the Wiki pages describing our design key points and trade-offs
 
 = Details =
 
-Open Issues:
+We discuss the following points
 
-1. How to generate all the Hazard logic without common synch logic?
-	a. RAW (Read after Write) Data Dependency Hazards: it seems that we can reproduce the logic by adding the following internal states into the execute logic to store the following data for 2 previous executions:
-           "WriteReg" - the register the result to be written into 
-           "RegWrite" - the control signal that say a register will be written
-           "Result" - the execution result.
-           When obtaining new command to execute the execution should look to see if any of the source registers match the previous, and if that previous was about to be written and then use the stored result as a "bypass"
-        b. Data Hazards from memory load 
-           We have several options fixing the hazard in Exe or Decode.
-           Anyway we will need to stall (1 or 2 cycles respectively). 
-           
-           We can share the implementation with the RAW for matching registers.
-
-           NOTE: we must allow write into RF not depending on the Decode ability to progress 
-  
-	b. Branch Hazards
-
-2. How to design the "instruction memory" interface? 
-	a. We can assume we add a delay line to mimic the max delay of the memory. So the CLK is driven internally and there needs to be an external "valid" signal to say when the data is become valid
-
-	b. We can let the environment set the clock and we will just change read address and read previous data on clock fall
-
-   Resolution: as we are asked ot meet synchronous environment we will implement option b.
-
-
-3. How to design the "data memory" interface ?
-	a. Use a delay line and a "valid" signal - in that case we drive the clock and wait for "valid" before we read in the data
-
-	b. Let the environment drive the clock and we only change the read address and read the data on clock fall
-
-   Resolution: as we are asked ot meet synchronous environment we will implement option b.
-
-3. Register File design:
-   For design minimalization we use the Haste regmem structure even tough we will need to enhance it to perform the 1W2R during same cycle. The implementation relies on the async behavior so we can schedule the write, read, read (if needed) as sequence of tasks. We could make the HW faster by implementing the regfile from latches and adding muxes etc.
+* [MemoryStageCycleTime	How Memory stage synchronize with Execute, Write-Back and External Memory]
+* [ExternalMemoryInterface How does the interface with external memory look like]
+* [RFWriteThenRead Decode Register File must not progress until the 3rd Write Back received]
+* [RAWHazards Describing how RAW Hazards are resolved]
+* [DataHazard How loading from memory into register will avoid hazards]	 
