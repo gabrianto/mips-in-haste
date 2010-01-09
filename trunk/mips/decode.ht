@@ -12,10 +12,10 @@
                ALUCtrl!var  aluctrl_type &
                AluSrcIm!var USint1 &
                RegDstRd!var USint1 &
-               Branch!var   USint1) .
+               Branch!var   USint1 &
+               Jump!var   USint1) .
 begin
 & AluOp : var [0..3]
-& Jump : var USint1
 | 
 [[RegWrite,RegDstRd,AluSrcIm,Branch,MemWrite,MemToReg,Jump,AluOp]] :=
    case op 
@@ -57,6 +57,7 @@ begin
 & AluSrcIm : var USint1 
 & RegDstRd : var USint1 
 & Branch   : var USint1
+& Jump     : var USint1
 & ALUCtrl  : var aluctrl_type
 // Instruction fields
 & Op       : var op_type
@@ -72,6 +73,7 @@ begin
 & PCPlus4_F  : var addr_type
 & Inst_F     : var data_type
 & SignImmX4  : var addr_type
+& NextPC     : var addr_type
 & SignImm    : var addr_type
 // Out to Exe
 & SrcA    : var data_type
@@ -102,8 +104,12 @@ begin
                         else [[0b0000000000000000, bitvec(Inst_F).0..15]] fi cast addr_type 
          );
          ctrl(Op, Func, 
-              RegWrite, MemToReg, MemWrite, ALUCtrl, AluSrcIm, RegDstRd, Branch);
-         d2f![[Branch, (PCPlus4_F + SignImmX4) fit addr_type]] ||
+              RegWrite, MemToReg, MemWrite, ALUCtrl, AluSrcIm, RegDstRd, 
+              Branch, Jump);
+         // TODO: we should have used PC MSB for the MSB of Next in case of J-Type address
+         NextPC := if boolvec(Jump).0 then SignImmX4 
+                   or boolvec(Branch).0 then (PCPlus4_F + SignImmX4) fit addr_type fi;
+         d2f![[Branch + Jump, NextPC]] ||
          (
             (SrcA := RF[Rs]; SrcB := RF[Rt]) || OutInPipe := (OutInPipe + 1) fit USint4;
             d2e![[SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite,
