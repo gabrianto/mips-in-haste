@@ -62,12 +62,15 @@ module mips_test;
            IM_DATA  <= inst_mem[IM_ADDR>>2];
            if (DM_WE)
              begin
-                data_mem[DM_ADDR] = DM_WR_DATA;
+                data_mem[DM_ADDR>>2] = DM_WR_DATA;
                 #200 CLK <= 0;
              end
            else
              begin 
-                #100 DM_RD_DATA <= data_mem[DM_ADDR];
+                #100 if (DM_ADDR > 8'hff)
+                  DM_RD_DATA <= 32'hffffffff;
+                else
+                  DM_RD_DATA <= data_mem[DM_ADDR>>2];
                 #200 CLK <= 0;
              end
 	     end
