@@ -1,5 +1,5 @@
-#summary One-sentence summary of this page.
-How to both synchronize with the e2m/m2w and the synch-memory
+#summary How Memory stage synchronize with the e2m/m2w and the synchronous memory
+
 = Introduction =
 
 Since the machine is asynch, we need to wait till we have a valid e2m channel-data, then setup the mem addr/ctl, then wait for the read-data to return (negedge of NEXT clock) and then drive the result to m2w pipe.
@@ -11,11 +11,3 @@ Option 2:
 do everything in series - which means we do not utilize the memory every cycle (1/2 clk rate at best)
 
 ** proposal: decide NOT to try & access memory at every clkc cycle but make do with once every 2 clks at best. Will check with Prof. Ginosar if this proposal is reasonable later on (& change and improve the stage as needed then)
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
