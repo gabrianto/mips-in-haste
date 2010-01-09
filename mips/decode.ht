@@ -19,13 +19,16 @@ begin
 | 
    [[RegWrite,RegDstRd,AluSrcIm,Branch,MemWrite,MemToReg,Jump,AluOp]] :=
       case op 
-        is MIPS_OP_RTYPE then [[1,1,0,0,0,0,0,2]] 
-        or MIPS_OP_LW    then [[1,0,1,0,0,1,0,0]] 
-        or MIPS_OP_SW    then [[0,0,1,0,1,0,0,0]] 
-        or MIPS_OP_BEQ   then [[0,0,0,1,0,0,0,1]] 
-        or MIPS_OP_BNE   then [[0,0,0,1,0,0,0,1]] 
-        or MIPS_OP_ADDI  then [[1,0,1,0,0,0,0,0]] 
-        or MIPS_OP_J     then [[0,0,0,0,0,0,1,0]] 
+        is MIPS_OP_RTYPE     then [[1,1,0,0,0,0,0,2]] 
+        or MIPS_OP_LW        then [[1,0,1,0,0,1,0,0]] 
+        or MIPS_OP_SW        then [[0,0,1,0,1,0,0,0]] 
+        or MIPS_OP_BEQ       then [[0,0,0,1,0,0,0,1]] 
+        or MIPS_OP_BNE       then [[0,0,0,1,0,0,0,1]] 
+        or MIPS_OP_BLTZ_BGEZ then [[0,0,0,1,0,0,0,1]] 
+        or MIPS_OP_BLEZ      then [[0,0,0,1,0,0,0,1]] 
+        or MIPS_OP_BGTZ      then [[0,0,0,1,0,0,0,1]]    
+        or MIPS_OP_ADDI      then [[1,0,1,0,0,0,0,0]] 
+        or MIPS_OP_J         then [[0,0,0,0,0,0,1,0]] 
         else [[0,0,0,0,0,0,0,0]]
       si;
     
