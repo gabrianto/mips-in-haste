@@ -94,10 +94,10 @@ begin
            Op :=  bitvec(Inst_F).26..31 cast op_type ||
            Func := bitvec(Inst_F).0..5 cast func_type ||
            SignImmX4 := 
-             if boolvec(Inst_F).16
+             if boolvec(Inst_F).15
                  then [[0b11111111111111, bitvec(Inst_F).0..15,0,0]] 
                  else [[0b00000000000000, bitvec(Inst_F).0..15,0,0]] fi cast addr_type ||
-           SignImm := if boolvec(Inst_F).16
+           SignImm := if boolvec(Inst_F).15
                         then [[0b1111111111111111, bitvec(Inst_F).0..15]] 
                         else [[0b0000000000000000, bitvec(Inst_F).0..15]] fi cast addr_type 
          );
