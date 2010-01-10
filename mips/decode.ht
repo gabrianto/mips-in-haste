@@ -48,25 +48,52 @@ begin
 end // ctrl
    
 // remove first inserted 
-& popOutstanding : proc (WaitReg0!var reg_type & WaitReg1, WaitReg2 : var reg_type) .
+& popOutstanding : proc (NumWaiting:var [0..3] ff & 
+                         WaitReg0!var reg_type & 
+                         WaitReg1, WaitReg2!var reg_type) .
 begin
+& EMPTY_BUG : chan reg_type
 | 
-   WaitReg0 := WaitReg1;
-   WaitReg1 := WaitReg2;
-   WaitReg2 := 0
+   if (NumWaiting = 0) then
+      EMPTY_BUG!NumWaiting
+   or (NumWaiting = 1) then
+      WaitReg0 := 0
+   or (NumWaiting = 2) then
+      WaitReg1 := 0
+   or (NumWaiting = 3) then
+      WaitReg2 := 0
+   else
+      EMPTY_BUG!NumWaiting
+   fi;
+   NumWaiting := NumWaiting - 1
 end // popOutstanding
 
 // push into 0
-& pushOutstanding : proc (WaitReg0:var reg_type &
+& pushOutstanding : proc (NumWaiting:var [0..3] ff & 
+                          WaitReg0:var reg_type &
                           WaitReg1:var reg_type & 
                           WaitReg2! var reg_type &
                           RegDstRd? var USint1 &
                           Rt, Rd? var reg_type  ) .
 begin
+& FULL_BUG : chan reg_type
+& Reg : var reg_type
 | 
-   WaitReg2 := WaitReg1;
-   WaitReg1 := WaitReg0;
-   WaitReg0 := if boolvec(RegDstRd).0 then Rd else Rt fi
+   
+   Reg := if boolvec(RegDstRd).0 then Rd else Rt fi;
+   if (NumWaiting > 2) then
+      FULL_BUG!NumWaiting
+   or (NumWaiting = 0) then
+      WaitReg0 := Reg
+   or (NumWaiting = 1) then
+      WaitReg1 := WaitReg0;
+      WaitReg0 := Reg
+   or (NumWaiting = 2) then
+      WaitReg2 := WaitReg1;
+      WaitReg1 := WaitReg0;
+      WaitReg0 := Reg
+   fi;
+   NumWaiting := NumWaiting + 1
 end // popOutstanding
 
 // Check if one of the current branch registers is outstanding
@@ -153,6 +180,7 @@ begin
 & RF : ramreg array [0..31] of data_type := 
   [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
 // track outstanding register numbers to be updated in a cyclic fifo
+& NumWaiting : var [0..3] ff := 0
 & WaitReg0 : var reg_type ff := 0
 & WaitReg1 : var reg_type ff := 0
 & WaitReg2 : var reg_type ff := 0
@@ -169,9 +197,9 @@ begin
          (OutInPipe := (OutInPipe - 1) fit USint4) ||
          if boolvec(RegWrite_W).0 then 
             // Stage := 2;
-            RF[WriteReg_W] := Result_W || 
-            popOutstanding(WaitReg0, WaitReg1, WaitReg2)
-         fi
+            RF[WriteReg_W] := Result_W
+         fi ||
+         popOutstanding(NumWaiting, WaitReg0, WaitReg1, WaitReg2);
       or -Stall * probe(f2d) * (OutInPipe < 2) then
          f2d?[[Inst_F, PCPlus4_F]];
          // Stage := 3;
@@ -192,11 +220,13 @@ begin
          // decode the instruction
          ctrl(Op, Func, RegWrite, MemToReg, MemWrite, ALUCtrl, AluSrcIm, RegDstRd, PosBranch, Jump);
 
-         // decide if 
+         // update outstanding registers
          if boolvec(RegWrite).0 then 
-            // update outstanding registers
-            pushOutstanding(WaitReg0, WaitReg1, WaitReg2, RegDstRd, Rt, Rd)
-         fi;
+            pushOutstanding(NumWaiting, 
+                            WaitReg0, WaitReg1, WaitReg2, RegDstRd, Rt, Rd)
+         else
+            pushOutstanding(NumWaiting, WaitReg0, WaitReg1, WaitReg2, 0, 0, 0)
+         fi ||
          // Stage := 4;
 
          // TODO: we should have used PC MSB for the MSB of Next in case of J-Type address
