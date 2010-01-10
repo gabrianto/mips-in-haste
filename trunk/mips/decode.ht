@@ -117,11 +117,13 @@ begin
       RtMatch1 := (WaitReg1 <> 0) * (WaitReg1 = Rt) ||
       RtMatch2 := (WaitReg2 <> 0) * (WaitReg2 = Rt) ;
       Stall := RsMatch0 + RsMatch1 + RsMatch2 + RtMatch0 + RtMatch1 + RtMatch2
-   else
+   or (Op = MIPS_OP_BLTZ_BGEZ) + (Op = MIPS_OP_BGTZ) + (Op = MIPS_OP_BLEZ) then
       RsMatch0 := (WaitReg0 <> 0) * (WaitReg0 = Rs) ||
       RsMatch1 := (WaitReg1 <> 0) * (WaitReg1 = Rs) ||
       RsMatch2 := (WaitReg2 <> 0) * (WaitReg2 = Rs);
       Stall := RsMatch0 + RsMatch1 + RsMatch2
+   else 
+      Stall := false
    fi
 end // isOutstanding
 
@@ -200,7 +202,7 @@ begin
             RF[WriteReg_W] := Result_W
          fi ||
          popOutstanding(NumWaiting, WaitReg0, WaitReg1, WaitReg2);
-      or -Stall * probe(f2d) * (OutInPipe < 2) then
+      or -Stall * probe(f2d) * (OutInPipe < 3) then
          f2d?[[Inst_F, PCPlus4_F]];
          // Stage := 3;
          ( 
@@ -243,9 +245,9 @@ begin
       if Stall then
          // Stage := 5;
 
-         // if we had a branch we may be stalling
+         // if we had a branch or other specific commands we may be stalling
+         isOutstanding(Op, Rs, Rt, WaitReg0, WaitReg1, WaitReg2, Stall); // update the Stall
          if boolvec(PosBranch).0 then 
-            isOutstanding(Op, Rs, Rt, WaitReg0, WaitReg1, WaitReg2, Stall); // update the Stall
             // Stage := 6;
 
             if -Stall then
@@ -260,11 +262,9 @@ begin
                   NextPC :=  (PCPlus4_F + SignImmX4) fit addr_type
                fi
             fi
-        else 
-           Branch := 0 ||
-           Stall := false
-        fi;
-
+         else 
+            Branch := 0
+         fi;
 
          if -Stall then
             SrcA := RF[Rs];
