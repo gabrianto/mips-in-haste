@@ -1,0 +1,12 @@
+#summary How Memory to Register Hazard is handled
+
+= Problem =
+
+When register is to be loaded from memory the next 
+commands depending on that register may start before the register is written back.
+
+= Solution =
+
+This is similar to Data Hazard that we already handling.
+Actually WriteReg is going to be the correct register and RegWrite is 1
+So the pipe already stalls until the register is read from memory
