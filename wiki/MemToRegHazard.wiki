@@ -7,6 +7,11 @@ commands depending on that register may start before the register is written bac
 
 = Solution =
 
-This is similar to Data Hazard that we already handling.
-Actually WriteReg is going to be the correct register and RegWrite is 1
-So the pipe already stalls until the register is read from memory
+It is better to handle this in the Exe to avoid the Decode stall for 3 cycles.
+So the exe will need to hold yet another pipe for outstanding MemToRegs 
+
+It will have 2 slots for MemToReg in the pipe.
+When sending push into that fifo.
+When receiving from back from Mem can pop that pipe and store last result and reg
+
+On each command check if need to stall or use the last register if matching
