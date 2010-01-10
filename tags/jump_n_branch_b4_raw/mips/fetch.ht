@@ -1,0 +1,24 @@
+#include "types.ht"
+
+& fetch : proc(d2f?chan d2f_type & 
+	            f2d!chan f2d_type &
+               IM_CLK?wire bool & 
+               IM_ADDR!wire addr_type & 
+               IM_DATA?wire data_type) .
+begin
+& im_addr    : var addr_type ff := 0 
+& im_data    : var data_type ff := 0 
+& IM_ADDR    : wire addr_type   := im_addr
+& pc_next    : var addr_type ff := 0
+& pc_branch  : var addr_type ff := 0     // decode provided next pc address
+& pc_src     : var USint1    ff := 0     // feedback from decode
+|
+   forever do
+	   negedge(IM_CLK);
+      (im_data := IM_DATA) || (pc_next := (im_addr + 4) fit addr_type);
+      f2d![[im_data, pc_next]];  
+      d2f?[[pc_src, pc_branch]];
+      im_addr := if boolvec(pc_src).0 then pc_branch else pc_next fi;
+      posedge(IM_CLK)
+   od
+end

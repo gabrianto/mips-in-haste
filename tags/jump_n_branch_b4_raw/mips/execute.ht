@@ -1,0 +1,67 @@
+#include "types.ht"
+
+//& bts3  =type  <<B,B,B>>
+// d2e needs to be passive here!! input
+// m2e needs to be passive or non existant
+
+& execute : proc(d2e?chan d2e_type & 
+                 m2e?chan m2e_type & 
+                 e2m!chan e2m_type) .
+
+// & execute : export proc(d2e?chan d2e_type & e2m!chan e2m_type) .  // temp one without m->e backchannel
+
+begin
+  SrcA 	: var data_type		ff := 0 
+& SrcB	: var data_type		ff := 0 
+& Rs	: var reg_type		ff := 0 cast reg_type
+& Rt	: var reg_type		ff := 0 cast reg_type
+& Rd	: var reg_type		ff := 0 cast reg_type
+& SignImm:	var data_type	ff := 0 
+& ALUCtrl 	: var bts3	ff := 0 cast bts3
+& RegWrite: var USint1		ff := 0 
+& MemToReg: var USint1		ff := 0
+& MemWrite: var USint1		ff := 0
+& ALUSrc : var USint1		ff := 0
+& RegDst : var USint1		ff := 0
+& SrcAE : var data_type		ff := 0 
+& SrcAtmp: var data_type	ff := 0 
+& SrcBE : var data_type		ff := 0 
+& SrcBtmp: var data_type	ff := 0 
+& ALUOut : var data_type	ff := 0 
+& WriteReg : var reg_type	ff := 0 cast reg_type
+
+// m2e back pipe sampling related logic
+//& m2e_data_1 : var word32	ff := 0 cast word32
+//& m2e_data_2 : var word32	ff := 0 cast word32
+
+
+ 
+|
+   forever do
+   // sample the d2e - sequential
+   d2e?[[SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite, ALUCtrl, ALUSrc, RegDst]];
+   (
+	SrcAtmp := SrcA || //will need a mux here for RAW hazard
+	SrcBtmp := SrcB;  // will need a mux here for RAW hazard
+   	SrcAE := SrcAtmp ||
+   	SrcBE := if (ALUSrc = 0) then SrcBtmp else SignImm fi;  
+	// Calculate the ALU output
+	ALUOut := case ALUCtrl 	is ALU_CTRL_AND then ((boolvec(SrcAE) * boolvec(SrcBE)) cast data_type)
+			 	or ALU_CTRL_OR then ((boolvec(SrcAE) + boolvec(SrcBE)) cast data_type)
+				or ALU_CTRL_ADD then (((SrcA) + (SrcBE)) fit  data_type)
+				or ALU_CTRL_SUB then (((SrcAE) - (SrcBE)) fit  data_type)
+				else (if ((SrcAE) < (SrcBE)) then (1 cast data_type) else (0 cast data_type) fi)   //SLT
+			si
+	) ||
+	WriteReg := if (RegDst = 1) then Rd else Rt fi;
+   // write to next pipe stage
+   e2m![[ALUOut cast addr_type, SrcBtmp, WriteReg, RegWrite, MemToReg, MemWrite ]] 
+   // execute topics:
+   // 1. ALU operations  - DONE assuming unsigned arithmetic
+   // 2. ALU input selection for immediates v.s. RtData - DONE
+   // 3. mux and pass through for the Rt and Rd reg # coming in from Decode (send out a single WriteRegExe)
+   // 4. RAW hazard handling: muxes, pipe stages, compare logic (see notes page)
+   // 5. use after load hazard handling: see wiki page...
+   // 6. ???
+   od
+end

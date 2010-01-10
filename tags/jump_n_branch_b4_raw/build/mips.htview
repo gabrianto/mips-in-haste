@@ -1,0 +1,118 @@
+VALUE "IM_CLK" {
+   path "mips"
+   path "fetch"
+   path "IM_CLK"
+   type  "b"
+   dtype "b"
+}
+
+VALUE "IM_ADDR" {
+   path "mips"
+   path "fetch"
+   path "IM_ADDR"
+   type  "[0..4294967295]"
+   dtype "[0..4294967295]"
+}
+
+VALUE "IM_DATA" {
+   path "mips"
+   path "fetch"
+   path "IM_DATA"
+   type  "hex [0..4294967295]"
+   dtype "[0..4294967295]"
+}
+
+VALUE "f2d" {
+   path "mips"
+   path "f2d"
+   type  "[[ [0..4294967295],[0..4294967295] ]]"
+   dtype "[[ [0..4294967295],[0..4294967295] ]]"
+}
+
+VALUE "d2e" {
+   path "mips"
+   path "d2e"
+   type  "[[ [0..4294967295],[0..4294967295],[0..31],[0..31],[0..31],[0..4294967295],[0..1],[0..1],[0..1],[0..7],[0..1],[0..1] ]]"
+   dtype "[[ [0..4294967295],[0..4294967295],[0..31],[0..31],[0..31],[0..4294967295],[0..1],[0..1],[0..1],[0..7],[0..1],[0..1] ]]"
+}
+
+VALUE "e2m" {
+   path "mips"
+   path "e2m"
+   type  "[[ [0..4294967295],[0..4294967295],[0..31],[0..1],[0..1],[0..1] ]]"
+   dtype "[[ [0..4294967295],[0..4294967295],[0..31],[0..1],[0..1],[0..1] ]]"
+}
+
+VALUE "m2w" {
+   path "mips"
+   path "m2w"
+   type  "[[ [0..4294967295],[0..31],[0..1],[0..1] ]]"
+   dtype "[[ [0..4294967295],[0..31],[0..1],[0..1] ]]"
+}
+
+VALUE "w2d" {
+   path "mips"
+   path "w2d"
+   type  "[[ [0..4294967295],[0..31],[0..1] ]]"
+   dtype "[[ [0..4294967295],[0..31],[0..1] ]]"
+}
+
+VALUE "DM_CLK" {
+   path "mips"
+   path "DM_CLK"
+   type  "[0..1]"
+   dtype "[0..1]"
+}
+
+VALUE "DM_WE" {
+   path "mips"
+   path "DM_WE"
+   type  "[0..1]"
+   dtype "[0..1]"
+}
+
+VALUE "DM_ADDR" {
+   path "mips"
+   path "DM_ADDR"
+   type  "[0..4294967295]"
+   dtype "[0..4294967295]"
+}
+
+VALUE "DM_RD_DATA" {
+   path "mips"
+   path "DM_RD_DATA"
+   type  "[0..4294967295]"
+   dtype "[0..4294967295]"
+}
+
+VALUE "DM_WR_DATA" {
+   path "mips"
+   path "DM_WR_DATA"
+   type  "[0..4294967295]"
+   dtype "[0..4294967295]"
+}
+
+VALUE "Result_W" {
+   path "mips"
+   path "decode"
+   path "Result_W"
+   type  "[0..4294967295]"
+   dtype "[0..4294967295]"
+}
+
+VALUE "WriteReg_W" {
+   path "mips"
+   path "decode"
+   path "WriteReg_W"
+   type  "[0..31]"
+   dtype "[0..31]"
+}
+
+VALUE "RegWrite_W" {
+   path "mips"
+   path "decode"
+   path "RegWrite_W"
+   type  "hex [0..1]"
+   dtype "[0..1]"
+}
+
