@@ -4,7 +4,8 @@ endif
 
 VPATH=../mips ../test
 
-all: compile dot map sim view 
+all: build dot sim view 
+build: compile map
 
 fetch_top.hcl: fetch_top.ht fetch.ht types.ht
 decode_top.hcl: decode_top.ht decode.ht types.ht
