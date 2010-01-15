@@ -4,11 +4,148 @@
 // d2e needs to be passive here!! input
 // m2e needs to be passive or non existant
 
+
+// Always push the current executed cmd into the queue - just make sure WriteReg is set only for R cmds
+& push_lcl : proc (NumWaitingR:var [0..2] ff &
+		   Waitreg0, Waitreg1:var reg_type &
+		   WaitRdata0, WaitRdata1:var data_type &
+		   WaitWriteReg0, WaitWriteReg1:var USint1 &
+		   ALUOut?var data_type &
+		   WriteReg?var reg_type &
+		   RegWrite?var USint1 &
+		   WaitWdata0, WaitWdata1:var data_type &
+		   WaitWdata_v0, WaitWdata_v1: var USint1 &
+		   WaitMemToReg0, WaitMemToReg1: var USint1 &
+		   MemToReg?var USint1) .
+begin
+& FULL_BUG : chan reg_type
+|
+ //  if (NumWaitingR >2) then
+ //  	FULL_BUG!NumWaiting
+ //  else 
+ 	// move 1 --> 0
+   	WaitRdata1 := WaitRdata0;
+	Waitreg1 := Waitreg0;
+	WaitWriteReg1 := WaitWriteReg0;
+	WaitWdata1 := WaitWdata0;
+	WaitWdata_v1 := WaitWdata_v0;
+	WaitMemToReg1 := WaitMemToReg0;
+	// load 0 with new info from end of execute
+	WaitRdata0 := ALUOut;
+	Waitreg0 := WriteReg;
+	WaitWriteReg0 := RegWrite;
+	WaitWdata0 := 0; 	// no reaturn data yet!
+	WaitWdata_v0 := 0;	// not valid as well
+	WaitMemToReg0 := MemToReg;
+	NumWaitingR := NumWaitingR + 1;
+ //  fi
+end
+
+& wb_update : proc (Waitreg0, Waitreg1:var reg_type &
+		   WaitWdata0, WaitWdata1:var data_type &
+		   WaitWdata_v0, WaitWdata_v1: var USint1 &
+		   WaitMemToReg0, WaitMemToReg1: var USint1 &
+		   WBResult? var data_type &
+		   WBWriteReg? var reg_type) .
+begin
+& OVER_WB_WRITE_BUG: chan reg_type
+& dummy: var reg_type  ff := 0
+|
+	if ((Waitreg1 = WBWriteReg) * (WaitWdata_v1 = 0) * (WaitMemToReg1 = 1)) then
+		WaitWdata1 := WBResult;
+		WaitWdata_v1 := 1;
+	or ((Waitreg0 = WBWriteReg) * (WaitWdata_v0 = 0) * (WaitMemToReg0 = 1)) then
+		WaitWdata0 := WBResult;
+		WaitWdata_v0 := 1;
+	else OVER_WB_WRITE_BUG?dummy;
+	fi
+end		
+// NEEDS MODIFICATION TO SEARCH FOR WB DATA AS WELL ***
+// NEEDS TO HAVE A STALL if match but no WB data ready!!!
+& isEOutstanding : proc(Rs?var reg_type &
+			Rt?var reg_type &
+			ALUCtrl?var bts3 &
+			ALUSrc?var USint1 &
+		   	Waitreg0, Waitreg1?var reg_type &
+		   	WaitRdata0, WaitRdata1?var data_type &
+		   	WaitWriteReg0, WaitWriteReg1?var USint1 &
+		  	WaitWdata0, WaitWdata1:var data_type &
+		   	WaitWdata_v0, WaitWdata_v1: var USint1 &
+		   	WaitMemToReg0, WaitMemToReg1: var USint1 &
+		   	EBypassRs!var USint1&
+			EBypassRt!var USint1 &
+			EBypassRsdata!var data_type &
+			EBypassRtdata!var data_type &
+			Stall: var bool) .
+// COULD probably do with just a single data save per entry (overwrite with write-back data...)			
+begin
+& RsMatch0 : var bool
+& RsMatch1 : var bool
+& RtMatch0 : var bool
+& RtMatch1 : var bool
+& RsMatchW0 : var bool
+& RsMatchW1 : var bool
+& RtMatchW0 : var bool
+& RtMatchW1 : var bool
+& RtStall0  : var bool
+& RtStall1  : var bool
+& RsStall0  : var bool
+& RsStall1  : var bool
+|
+  (RsMatch0 := (Waitreg0 = Rs) * (WaitWriteReg0 <> 0) * (WaitMemToReg0 = 0)||
+   RsMatch1 := (Waitreg1 = Rs) * (WaitWriteReg1 <> 0) * (WaitMemToReg1 = 0)||
+   RsMatchW0 := (Waitreg0 = Rs) *((WaitMemToReg0 <> 0) * (WaitWdata_v0 <> 0))||
+   RsMatchW1 := (Waitreg1 = Rs) * ((WaitMemToReg1 <> 0) * (WaitWdata_v1 <> 0)) ||
+   RsStall0 := (Waitreg0 = Rs) * (WaitMemToReg0 <> 0) * (WaitWdata_v0 = 0) || 
+   RsStall1 := (Waitreg1 = Rs) * (WaitMemToReg1 <> 0) * (WaitWdata_v1 = 0)) ||
+   if (ALUSrc = 0) then
+   	(RtMatch0 := (Waitreg0 = Rt) * (WaitWriteReg0 <> 0) * (WaitMemToReg0 = 0) ||
+   	 RtMatch1 := (Waitreg1 = Rt) * (WaitWriteReg1 <> 0) * (WaitMemToReg1 = 0) ||
+	 RtMatchW0 := (Waitreg0 = Rt) *((WaitMemToReg0 <> 0) * (WaitWdata_v0 <> 0))||
+   	 RtMatchW1 := (Waitreg1 = Rt) *((WaitMemToReg1 <> 0) * (WaitWdata_v1 <> 0)) ||
+	 RtStall0 := (Waitreg0 = Rt) * (WaitMemToReg0 <> 0) * (WaitWdata_v0 = 0) || 
+   	 RtStall1 := (Waitreg1 = Rt) * (WaitMemToReg1 <> 0) * (WaitWdata_v1 = 0)) 
+   fi ;
+   if 	(RsMatch0) then
+   	EBypassRsdata := WaitRdata0 ||
+	EBypassRs := 1;
+   or (RsMatch1) then
+   	EBypassRsdata := WaitRdata1 ||
+	EBypassRs := 1;
+   or  (RsMatchW0) then
+   	EBypassRsdata := WaitWdata0 ||
+	EBypassRs := 1;   
+   or  (RsMatchW1) then
+   	EBypassRsdata := WaitWdata1 ||
+	EBypassRs := 1;   
+   else 	
+   	EBypassRs := 0
+   fi	;
+   if 	(RtMatch0) then
+   	EBypassRtdata := WaitRdata0 ||
+	EBypassRt := 1;
+   or (RtMatch1) then
+   	EBypassRtdata := WaitRdata1 ||
+	EBypassRt := 1;
+   or (RtMatchW0) then
+   	EBypassRtdata := WaitWdata0 ||
+	EBypassRt := 1;
+   or (RtMatchW1) then
+   	EBypassRtdata := WaitWdata1 ||
+	EBypassRt := 1;
+   else 	
+   	EBypassRt := 0
+   fi;	
+   Stall := RsStall0 + RsStall1 + RtStall0 + RtStall1;
+end
+			
+
+
 & execute : proc(d2e?chan d2e_type & 
                  m2e?chan m2e_type & 
+		 w2e?chan w2e_type &
                  e2m!chan e2m_type) .
 
-// & execute : export proc(d2e?chan d2e_type & e2m!chan e2m_type) .  // temp one without m->e backchannel
 
 begin
   SrcA 	: var data_type		ff := 0 
@@ -29,6 +166,30 @@ begin
 & SrcBtmp: var data_type	ff := 0 
 & ALUOut : var data_type	ff := 0 
 & WriteReg : var reg_type	ff := 0 cast reg_type
+& NumWaitingR:var [0..2] 	ff := 0
+& Waitreg0: var reg_type	ff := 0
+& Waitreg1: var reg_type 	ff := 0 
+& WaitRdata0 : var data_type	ff := 0
+& WaitRdata1:var data_type 	ff := 0
+& WaitWriteReg0 :var USint1	ff := 0
+& WaitWriteReg1:var USint1 	ff := 0
+& WaitWdata0 : var data_type	ff := 0
+& WaitWdata1:var data_type 	ff := 0
+& WaitMemToReg0 :var USint1	ff := 0
+& WaitMemToReg1:var USint1 	ff := 0
+& WaitWdata_v0 :var USint1	ff := 0
+& WaitWdata_v1 :var USint1 	ff := 0
+& WBresult: var data_type 	ff := 0
+& WBWriteReg: var reg_type	ff := 0
+& EBypassRsdata:var data_type	ff :=0
+& EBypassRtdata:var data_type	ff :=0
+& EBypassRs:var USint1		ff :=0
+& EBypassRt:var USint1		ff :=0
+& Stall:var bool		ff := false
+& potential_upd: var bool	ff:= false
+& new_cmd: var bool		ff:= false
+
+
 
 // m2e back pipe sampling related logic
 //& m2e_data_1 : var word32	ff := 0 cast word32
@@ -38,24 +199,57 @@ begin
  
 |
    forever do
-   // sample the d2e - sequential
-   d2e?[[SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite, ALUCtrl, ALUSrc, RegDst]];
-   (
-	SrcAtmp := SrcA || //will need a mux here for RAW hazard
-	SrcBtmp := SrcB;  // will need a mux here for RAW hazard
-   	SrcAE := SrcAtmp ||
-   	SrcBE := if (ALUSrc = 0) then SrcBtmp else SignImm fi;  
-	// Calculate the ALU output
-	ALUOut := case ALUCtrl 	is ALU_CTRL_AND then ((boolvec(SrcAE) * boolvec(SrcBE)) cast data_type)
-			 	or ALU_CTRL_OR then ((boolvec(SrcAE) + boolvec(SrcBE)) cast data_type)
-				or ALU_CTRL_ADD then (((SrcA) + (SrcBE)) fit  data_type)
-				or ALU_CTRL_SUB then (((SrcAE) - (SrcBE)) fit  data_type)
-				else (if ((SrcAE) < (SrcBE)) then (1 cast data_type) else (0 cast data_type) fi)   //SLT
-			si
-	) ||
-	WriteReg := if (RegDst = 1) then Rd else Rt fi;
-   // write to next pipe stage
-   e2m![[ALUOut cast addr_type, SrcBtmp, WriteReg, RegWrite, MemToReg, MemWrite ]] 
+   // if w2e then update pipe; set potential_upd
+   if outprobe(w2e) then
+   	w2e?[[WBresult, WBWriteReg]];
+	potential_upd := true ||
+	wb_update(Waitreg0, Waitreg1,
+		   WaitWdata0, WaitWdata1,
+		   WaitWdata_v0, WaitWdata_v1,
+		   WaitMemToReg0, WaitMemToReg1,
+		   WBresult,
+		   WBWriteReg)
+   fi;
+   // if no stall then probe d2e and sample; set new_cmd
+   if (-Stall) * outprobe(d2e) then
+   	d2e?[[SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, MemWrite, ALUCtrl, ALUSrc, RegDst]];
+	new_cmd := true
+   fi;
+   // if new_cmd * (~Stall or Stall & Pontential_upd) recheck pipe and clr Potential_upd
+   if (new_cmd * (-Stall + Stall*potential_upd)) then
+      	isEOutstanding(Rs, Rt, ALUCtrl, ALUSrc, Waitreg0, Waitreg1, WaitRdata0, WaitRdata1, WaitWriteReg0, WaitWriteReg1,WaitWdata0, WaitWdata1, WaitWdata_v0, WaitWdata_v1, WaitMemToReg0, WaitMemToReg1,EBypassRs, EBypassRt, EBypassRsdata, EBypassRtdata,Stall);
+	potential_upd := false;
+   // if ~stall and new_cmd - execute and clear new_cmd
+   	if -Stall then 
+	(
+		SrcAtmp := if (EBypassRs = 0) then SrcA else EBypassRsdata fi || //RAW hazard
+		SrcBtmp := if (EBypassRt = 0) then SrcB else EBypassRtdata fi;  // RAW hazard
+   		SrcAE := SrcAtmp ||
+   		SrcBE := if (ALUSrc = 0) then SrcBtmp else SignImm fi;  
+		// Calculate the ALU output
+		ALUOut := case ALUCtrl 	is ALU_CTRL_AND then ((boolvec(SrcAE) * boolvec(SrcBE)) cast data_type)
+			 		or ALU_CTRL_OR then ((boolvec(SrcAE) + boolvec(SrcBE)) cast data_type)
+					or ALU_CTRL_ADD then (((SrcAE) + (SrcBE)) fit  data_type)
+					or ALU_CTRL_SUB then (((SrcAE) - (SrcBE)) fit  data_type)
+					else (if ((SrcAE) < (SrcBE)) then (1 cast data_type) else (0 cast data_type) fi)   //SLT
+				si
+		) ||
+		WriteReg := if (RegDst = 1) then Rd else Rt fi;
+		new_cmd := false;
+   		// write to next pipe stage
+   		push_lcl (NumWaitingR, Waitreg0, Waitreg1,
+		   	WaitRdata0, WaitRdata1,
+		  	 WaitWriteReg0, WaitWriteReg1,
+		  	 ALUOut,
+		   	WriteReg,
+		   	RegWrite,
+		   	WaitWdata0, WaitWdata1,
+		   	WaitWdata_v0, WaitWdata_v1,
+		   	WaitMemToReg0, WaitMemToReg1,
+		   	MemToReg);
+   		e2m![[ALUOut cast addr_type, SrcBtmp, WriteReg, RegWrite, MemToReg, MemWrite ]]
+	fi 
+   fi
    // execute topics:
    // 1. ALU operations  - DONE assuming unsigned arithmetic
    // 2. ALU input selection for immediates v.s. RtData - DONE

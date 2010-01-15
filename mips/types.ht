@@ -133,8 +133,8 @@
 // W to D: Result, WriteReg, RegWrite
 & w2d_type =type [[data_type, reg_type, USint1]]
 
-// W to E: Result
-& w2e_type =type [[word32]]
+// W to E: Result, WriteReg
+& w2e_type =type [[data_type, reg_type]]
 
 /////////////////////////////////////////////////////////////////////////
 // Internal Cross Module Constants
