@@ -2,7 +2,7 @@
 
 & writeback : proc(m2w?chan m2w_type & 
                    w2d!chan w2d_type &
-//                 w2e!chan w2e_type &
+                   w2e!chan w2e_type &
                    WM_CLK?wire USint1 &
                    WM_RD_DATA?wire data_type) .
 begin
@@ -24,6 +24,7 @@ begin
       wm_rd_data := WM_RD_DATA;
       // mux and write back
       result := if boolvec(w2m_MemToReg).0 then wm_rd_data else w2m_ALUOut fi;
+      if boolvec(w2m_MemToReg).0 then w2e![[result, w2m_WriteReg]] fi;
       w2d![[result, w2m_WriteReg, w2m_RegWrite]];
    od
 end

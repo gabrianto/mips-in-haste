@@ -31,12 +31,12 @@ begin
 & m2e : chan m2e_type 
 & m2w : chan m2w_type 
 & w2d : chan w2d_type
-//& w2e : chan w2e_type
+& w2e : chan w2e_type
 |
   // top level connectivity...
   fetch(d2f, f2d, IM_CLK, IM_ADDR, IM_DATA) ||
   decode(f2d, m2d, w2d, d2f, d2e) || 
-  execute(d2e, m2e, e2m) || 
+  execute(d2e, m2e, w2e, e2m) || 
   memory(e2m, m2w, m2d, m2e, DM_CLK, DM_WE, DM_ADDR, DM_WR_DATA) || 
-  writeback(m2w, w2d, DM_CLK, DM_RD_DATA)
+  writeback(m2w, w2d, w2e, DM_CLK, DM_RD_DATA)
 end
