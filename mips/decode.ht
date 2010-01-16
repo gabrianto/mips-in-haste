@@ -76,18 +76,20 @@ begin
 | 
    
    Reg := if boolvec(RegDstRd).0 then Rd else Rt fi;
-   // place the new entry to WaitReg0 pushing up the rest
-   if WaitReg2.1 then
-      FULL_BUG!false
-   or WaitReg1.1 then
-      WaitReg2 := WaitReg1;
-      WaitReg1 := WaitReg0;
-      WaitReg0 := [[true, Reg]]
-   or WaitReg0.1 then
-      WaitReg1 := WaitReg0;
-      WaitReg0 := [[true, Reg]]
-   else
-      WaitReg0 := [[true, Reg]]
+   if (Reg <> 0) then
+      // place the new entry to WaitReg0 pushing up the rest
+      if WaitReg2.1 then
+         FULL_BUG!false
+      or WaitReg1.1 then
+         WaitReg2 := WaitReg1;
+         WaitReg1 := WaitReg0;
+         WaitReg0 := [[true, Reg]]
+      or WaitReg0.1 then
+         WaitReg1 := WaitReg0;
+         WaitReg0 := [[true, Reg]]
+      else
+         WaitReg0 := [[true, Reg]]
+      fi
    fi
 end // popOutstanding
 
@@ -168,21 +170,21 @@ begin
 // takeBranch
 
 //For debug only
-//& Stage    : var [0..15]   ff := 0
+& Stage    : var [0..15]   ff := 0
 |
    forever do
       sel outprobe(w2d) then
-         // Stage := 1;
+         Stage := 1;
          w2d?[[Result_W, WriteReg_W, RegWrite_W]];
          (OutInPipe := (OutInPipe - 1) fit USint4) ||
          if boolvec(RegWrite_W).0 then 
-            // Stage := 2;
+            Stage := 2;
             RF[WriteReg_W] := Result_W
          fi ||
          popOutstanding(WaitReg0, WaitReg1, WaitReg2)
       or -Stall * probe(f2d) * (OutInPipe < 3) then
          f2d?[[Inst_F, PCPlus4_F]];
-         // Stage := 3;
+         Stage := 3;
          [[Rs, Rt, Rd]] := 
           bitvec(Inst_F).11..25 cast [[reg_type,reg_type,reg_type]] ||
          Op :=  bitvec(Inst_F).26..31 cast op_type ||
@@ -216,27 +218,27 @@ begin
          // flag we have a command in flight
          Stall := true
 
-         // Stage := 4;
+         ; Stage := 4
       les;
 
       // this section is re-evaluated every time we get a new command or
       // write-back
       if Stall then
-         // Stage := 5;
+         Stage := 5;
 
          // if we had a branch or other specific commands we may be stalling
          Stall := isOutstanding();
          if boolvec(PosBranch).0 then 
-            // Stage := 6;
+            Stage := 6;
 
             if -Stall then
                if (Op = MIPS_OP_BNE) + (Op = MIPS_OP_BEQ) then
                   RtD := RF[Rt]
                fi;
-               // Stage := 7;
+               Stage := 7;
                RsD := RF[Rs];
                Branch := takeBranch(); 
-               // Stage := 8;
+               Stage := 8;
                if boolvec(Branch).0 then 
                   NextPC := (PCPlus4_F + SignImmX4) fit addr_type
                fi
