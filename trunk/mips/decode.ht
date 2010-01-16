@@ -76,20 +76,18 @@ begin
 | 
    
    Reg := if boolvec(RegDstRd).0 then Rd else Rt fi;
-   if (Reg <> 0) then
-      // place the new entry to WaitReg0 pushing up the rest
-      if WaitReg2.1 then
-         FULL_BUG!false
-      or WaitReg1.1 then
-         WaitReg2 := WaitReg1;
-         WaitReg1 := WaitReg0;
-         WaitReg0 := [[true, Reg]]
-      or WaitReg0.1 then
-         WaitReg1 := WaitReg0;
-         WaitReg0 := [[true, Reg]]
-      else
-         WaitReg0 := [[true, Reg]]
-      fi
+   // place the new entry to WaitReg0 pushing up the rest
+   if WaitReg2.1 then
+      FULL_BUG!false
+   or WaitReg1.1 then
+      WaitReg2 := WaitReg1;
+      WaitReg1 := WaitReg0;
+      WaitReg0 := [[true, Reg]]
+   or WaitReg0.1 then
+      WaitReg1 := WaitReg0;
+      WaitReg0 := [[true, Reg]]
+   else
+      WaitReg0 := [[true, Reg]]
    fi
 end // popOutstanding
 
