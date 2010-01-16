@@ -1,4 +1,5 @@
 #summary Design considerations for the Asynchronous MIPS.
+#labels Phase-Design
 
 = Introduction =
 
