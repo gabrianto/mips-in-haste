@@ -200,12 +200,6 @@ begin
          ctrl(Op, Func, RegWrite, MemToReg, MemWrite, ALUCtrl, AluSrcIm, 
               RegDstRd, PosBranch, Jump);
 
-         // update outstanding registers
-         pushOutstanding(WaitReg0, WaitReg1, WaitReg2, 
-                        if boolvec(RegWrite).0 then RegDstRd else 0 fi, 
-                        if boolvec(RegWrite).0 then Rt else 0 fi, 
-                        if boolvec(RegWrite).0 then Rd else 0 fi) ||
-
          // TODO: we should have used PC MSB for the MSB of Next in case of
          // J-Type address
          if boolvec(Jump).0 then NextPC := SignImmX4 fi ||
@@ -250,6 +244,11 @@ begin
             SrcB := RF[Rt];
             d2f![[(boolvec(Branch).0 + boolvec(Jump).0) cast USint1, 
                   NextPC]] ||
+            // update outstanding registers
+            pushOutstanding(WaitReg0, WaitReg1, WaitReg2, 
+                           if boolvec(RegWrite).0 then RegDstRd else 0 fi, 
+                           if boolvec(RegWrite).0 then Rt else 0 fi, 
+                           if boolvec(RegWrite).0 then Rd else 0 fi) ||
             d2e![[SrcA, SrcB, Rs, Rt, Rd, SignImm, RegWrite, MemToReg, 
                   MemWrite, ALUCtrl, AluSrcIm, RegDstRd]]
          fi
