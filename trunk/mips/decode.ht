@@ -160,9 +160,9 @@ begin
    case Op 
       is MIPS_OP_BNE       then RsD <> RtD 
       or MIPS_OP_BEQ       then RsD = RtD 
-      or MIPS_OP_BLTZ_BGEZ then boolvec(Rt).0 # sign(RsD)
-      or MIPS_OP_BLEZ      then sign(RsD)
-      or MIPS_OP_BGTZ      then RsD > 0
+      or MIPS_OP_BLTZ_BGEZ then boolvec(Rt).0 # sign(RsD cast signed_data_type)
+      or MIPS_OP_BLEZ      then (RsD = 0) + sign(RsD cast signed_data_type)
+      or MIPS_OP_BGTZ      then -sign(RsD cast signed_data_type) 
       else false
    si cast USint1
 // takeBranch
