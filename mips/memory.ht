@@ -2,7 +2,6 @@
 
 & memory : proc(e2m?chan e2m_type & 
                 m2w!chan m2w_type &
-                m2d!chan m2d_type & 
                 m2e!chan m2e_type &
                 MM_CLK?wire USint1 &           
                 MM_WE!wire USint1 &           
