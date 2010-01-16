@@ -32,7 +32,7 @@
 
 // Memory word is 32 bit
 & data_type =type [0..4294967295]
-
+& signed_data_type =type [-2147483648..2147483647]
 // There are 32 registers
 & reg_type  =type [0..31]
 
