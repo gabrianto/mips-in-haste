@@ -142,8 +142,7 @@ end
 
 
 & execute : proc(d2e?chan d2e_type & 
-                 m2e?chan m2e_type & 
-		 w2e?chan w2e_type &
+                 w2e?chan w2e_type &
                  e2m!chan e2m_type) .
 
 
@@ -188,15 +187,6 @@ begin
 & Stall:var bool		ff := false
 & potential_upd: var bool	ff:= false
 & new_cmd: var bool		ff:= false
-
-
-
-// m2e back pipe sampling related logic
-//& m2e_data_1 : var word32	ff := 0 cast word32
-//& m2e_data_2 : var word32	ff := 0 cast word32
-
-
- 
 |
    forever do
    // if w2e then update pipe; set potential_upd
