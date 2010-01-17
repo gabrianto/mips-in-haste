@@ -98,14 +98,14 @@ begin
    RsMatchW1 := (Waitreg1 = Rs) * ((WaitMemToReg1 <> 0) * (WaitWdata_v1 <> 0)) ||
    RsStall0 := (Waitreg0 = Rs) * (WaitMemToReg0 <> 0) * (WaitWdata_v0 = 0) || 
    RsStall1 := (Waitreg1 = Rs) * (WaitMemToReg1 <> 0) * (WaitWdata_v1 = 0)) ||
-   if (ALUSrc = 0) then
-   	(RtMatch0 := (Waitreg0 = Rt) * (WaitWriteReg0 <> 0) * (WaitMemToReg0 = 0) ||
-   	 RtMatch1 := (Waitreg1 = Rt) * (WaitWriteReg1 <> 0) * (WaitMemToReg1 = 0) ||
-	 RtMatchW0 := (Waitreg0 = Rt) *((WaitMemToReg0 <> 0) * (WaitWdata_v0 <> 0))||
-   	 RtMatchW1 := (Waitreg1 = Rt) *((WaitMemToReg1 <> 0) * (WaitWdata_v1 <> 0)) ||
-	 RtStall0 := (Waitreg0 = Rt) * (WaitMemToReg0 <> 0) * (WaitWdata_v0 = 0) || 
-   	 RtStall1 := (Waitreg1 = Rt) * (WaitMemToReg1 <> 0) * (WaitWdata_v1 = 0)) 
-   fi ;
+   // if (ALUSrc = 0) then // NO. Needs to be always done even if ALU uses the IMM!
+   (RtMatch0 := (Waitreg0 = Rt) * (WaitWriteReg0 <> 0) * (WaitMemToReg0 = 0) ||
+   RtMatch1 := (Waitreg1 = Rt) * (WaitWriteReg1 <> 0) * (WaitMemToReg1 = 0) ||
+   RtMatchW0 := (Waitreg0 = Rt) *((WaitMemToReg0 <> 0) * (WaitWdata_v0 <> 0))||
+   RtMatchW1 := (Waitreg1 = Rt) *((WaitMemToReg1 <> 0) * (WaitWdata_v1 <> 0)) ||
+   RtStall0 := (Waitreg0 = Rt) * (WaitMemToReg0 <> 0) * (WaitWdata_v0 = 0) || 
+   RtStall1 := (Waitreg1 = Rt) * (WaitMemToReg1 <> 0) * (WaitWdata_v1 = 0)) ;
+   // fi ;
    if 	(RsMatch0) then
    	EBypassRsdata := WaitRdata0 ||
 	EBypassRs := 1;
