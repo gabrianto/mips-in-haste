@@ -17,6 +17,9 @@ module mips_test;
    reg  [9:0]  addr, next_addr;
    reg  [31:0] inst_mem [0:1023];
    reg  [31:0] data_mem [0:1023];
+
+   // log
+   integer     log_chan;
    
    initial begin
       $readmemb("./inst_mem.list", inst_mem); // the memory file
@@ -31,6 +34,7 @@ module mips_test;
    // simulation duration
    initial
      begin
+        log_chan = $fopen("mips_dmem_write.log");
 	     $dumpfile("mips.vcd");
 	     $dumpvars(10, mips_test);
         
@@ -63,6 +67,9 @@ module mips_test;
            if (DM_WE)
              begin
                 data_mem[DM_ADDR>>2] = DM_WR_DATA;
+                $fdisplay(log_chan, "at: %d writing %d to %d", 
+                          $time,  DM_WR_DATA, DM_ADDR);
+                
                 #100 CLK <= 0;
              end
            else
