@@ -121,12 +121,6 @@
 // F to D: Inst, PCPlus4
 & f2d_type =type [[data_type, addr_type]]
 
-// M to D: ALUOut (the addr of mem rd/wr)
-& m2d_type =type data_type
-
-// M to E: ALUOut (the addr of mem rd/wr)
-& m2e_type =type [[word32]]
-
 // M to W: ALUOut, WriteReg, RegWrite, MemToReg
 & m2w_type =type [[data_type, reg_type, USint1, USint1]]
 
