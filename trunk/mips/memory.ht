@@ -15,10 +15,6 @@ begin
 & MM_WE      : wire USint1      := mm_we
 & MM_ADDR    : wire addr_type := mm_addr
 & MM_WR_DATA : wire data_type := mm_wr_data
-// input signals are sampled into FF
-//& em_rd_data  : var data_type ff := 0
-//& em_rd_valid : var USint1      ff := false
-//& m2w_ptr : var USint1	ff := 0
 & e2m_ALUOut : var addr_type ff := 0 
 & e2m_WriteData: var data_type ff := 0 
 & e2m_WriteReg: var reg_type ff := 0
@@ -28,8 +24,8 @@ begin
 |
    forever do
  //  	if outprobe (e2m) then
-      e2m?[[e2m_ALUOut, e2m_WriteData, e2m_WriteReg, e2m_RegWrite, e2m_MemToReg, e2m_MemWrite]]; 
-   	negedge(MM_CLK);
+        	e2m?[[e2m_ALUOut, e2m_WriteData, e2m_WriteReg, e2m_RegWrite, e2m_MemToReg, e2m_MemWrite]]; 
+   		negedge(MM_CLK);
 		mm_we := e2m_MemWrite ||
 		mm_addr := e2m_ALUOut ||
 		mm_wr_data := e2m_WriteData;
@@ -38,7 +34,7 @@ begin
 //	em_rd_data := sample(MM_RD_DATA);
 //	em_rd_valid := sample(MM_RD_VALID);
 		mm_we := 0;	// kill writes unless a new cmd comes in; Should actually wait for next negedge. will use probe in real top level
-		m2w![[e2m_ALUOut cast data_type, e2m_WriteReg, e2m_RegWrite, e2m_MemToReg]]
+		m2w![[e2m_ALUOut cast data_type, e2m_WriteReg, e2m_RegWrite, e2m_MemToReg]];
 //	else 
 //   		negedge(MM_CLK);
 //		mm_we := 0; // kill a following accidental write
