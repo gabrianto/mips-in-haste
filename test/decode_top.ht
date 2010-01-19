@@ -6,7 +6,6 @@
 #include "../mips/decode.ht"
 
 & decode_top : main proc(f2d_top?chan f2d_type & 
-                         m2d_top?chan m2d_type & 
                          w2d_top?chan w2d_type &
                          d2f!chan d2f_type & 
                          d2e!chan d2e_type) .
@@ -14,21 +13,16 @@ begin
   // since we probe the channels f2d and w2d in the decode we can 
   // not have them as top level interface
   f2d : chan f2d_type
-& m2d : chan m2d_type
 & w2d : chan w2d_type
 & f2d_var : var f2d_type
 & w2d_var : var w2d_type
-& m2d_var : var m2d_type
 |
      // top level connectivity...
    forever do
-      decode(f2d, m2d, w2d, d2f, d2e) 
+      decode(f2d, w2d, d2f, d2e) 
    od ||
    forever do
       f2d_top?f2d_var; f2d!f2d_var 
-   od ||
-   forever do
-      m2d_top?m2d_var; m2d!m2d_var
    od ||
    forever do
       w2d_top?w2d_var; w2d!w2d_var 
