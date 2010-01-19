@@ -20,9 +20,6 @@
 begin
 & FULL_BUG : chan reg_type
 |
- //  if (NumWaitingR >2) then
- //  	FULL_BUG!NumWaiting
- //  else 
  	// move 1 --> 0
    	WaitRdata1 := WaitRdata0;
 	Waitreg1 := Waitreg0;
@@ -38,7 +35,6 @@ begin
 	WaitWdata_v0 := 0;	// not valid as well
 	WaitMemToReg0 := MemToReg;
 	NumWaitingR := NumWaitingR + 1;
- //  fi
 end
 
 & wb_update : proc (Waitreg0, Waitreg1:var reg_type &
@@ -60,8 +56,6 @@ begin
 	else OVER_WB_WRITE_BUG?dummy;
 	fi
 end		
-// NEEDS MODIFICATION TO SEARCH FOR WB DATA AS WELL ***
-// NEEDS TO HAVE A STALL if match but no WB data ready!!!
 & isEOutstanding : proc(Rs?var reg_type &
 			Rt?var reg_type &
 			ALUCtrl?var bts3 &
@@ -142,7 +136,8 @@ end
 
 
 & execute : proc(d2e?chan d2e_type & 
-                 w2e?chan w2e_type &
+//               m2e?chan m2e_type & 
+		 w2e?chan w2e_type &
                  e2m!chan e2m_type) .
 
 
@@ -187,6 +182,11 @@ begin
 & Stall:var bool		ff := false
 & potential_upd: var bool	ff:= false
 & new_cmd: var bool		ff:= false
+
+
+
+
+ 
 |
    forever do
    // if w2e then update pipe; set potential_upd
