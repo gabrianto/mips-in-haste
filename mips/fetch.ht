@@ -1,7 +1,7 @@
 #include "types.ht"
 
 & fetch : proc(d2f?chan d2f_type & 
-	            f2d!chan f2d_type &
+               f2d!chan f2d_type &
                IM_CLK?wire bool & 
                IM_ADDR!wire addr_type & 
                IM_DATA?wire data_type) .
@@ -14,7 +14,7 @@ begin
 & pc_src     : var USint1    ff := 0     // feedback from decode
 |
    forever do
-	   negedge(IM_CLK);
+      negedge(IM_CLK);
       (im_data := sample(IM_DATA)) || (pc_next := (im_addr + 4) fit addr_type);
       f2d![[im_data, pc_next]];  
       d2f?[[pc_src, pc_branch]];
