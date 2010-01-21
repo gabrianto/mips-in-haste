@@ -13,19 +13,14 @@ begin
 & w2m_RegWrite: var USint1 ff := 0
 & w2m_MemToReg: var USint1 ff := 0 
 & result      : var data_type
-& w_clk       : var bool ff := false
 |
    forever do
       m2w?[[w2m_ALUOut, w2m_WriteReg, w2m_RegWrite, w2m_MemToReg]];
-//      wait(w_clk <> boolvec(WM_CLK).0);
-//      w_clk := true;
-//      wait(w_clk <> boolvec(WM_CLK).0);
-//      w_clk := false;
-      negedge(WM_CLK); // re-try using negedge
+      negedge(WM_CLK); 
       wm_rd_data := WM_RD_DATA;
       // mux and write back
       result := if boolvec(w2m_MemToReg).0 then wm_rd_data else w2m_ALUOut fi;
       if boolvec(w2m_MemToReg).0 then w2e![[result, w2m_WriteReg]] fi;
-      w2d![[result, w2m_WriteReg, w2m_RegWrite]];
+      w2d![[result, w2m_WriteReg, w2m_RegWrite]]
    od
 end
