@@ -27,31 +27,30 @@ module mips_test;
    end
 
    mips mips(.Z_R(reset__R),
-             .IM_CLK(CLK), .IM_ADDR(IM_ADDR), .IM_DATA(IM_DATA), 
-             .DM_CLK(CLK), .DM_WE(DM_WE), .DM_ADDR(DM_ADDR), .DM_WR_DATA(DM_WR_DATA), 
+             .IM_CLK(CLK), .IM_ADDR(IM_ADDR), 
+             .IM_DATA(IM_DATA), 
+             .DM_CLK(CLK), .DM_WE(DM_WE), 
+             .DM_ADDR(DM_ADDR), .DM_WR_DATA(DM_WR_DATA), 
              .DM_RD_DATA(DM_RD_DATA) );
    
    // simulation duration
-   initial
-     begin
-        log_chan = $fopen("mips_dmem_write.log");
-	     $dumpfile("mips.vcd");
-	     $dumpvars(10, mips_test);
-        
-	     #40000 $stop;
-	     $finish;
-     end
+   initial begin
+      log_chan = $fopen("mips_dmem_write.log");
+	   $dumpfile("mips.vcd");
+	   $dumpvars(10, mips_test);
+	   #40000 $stop;
+	   $finish;
+   end
 
    // monitoring result
-   initial
-     begin
-	     #20 $display("             Time   | CLK | IM_ADDR    | IM_DATA    | DM_WE | DM_ADDR    | DM_WR_DATA | DM_RD_DATA |");
-	         $display("             ====== | === | ========== | ========== | ===== | ========== | ========== |");
-        
-	     $monitor($time,"| 0x%x | 0x%x | 0x%x |  0x%x  | 0x%x | 0x%x | 0x%x |",
-                 CLK, IM_ADDR, IM_DATA, DM_WE, DM_ADDR, DM_WR_DATA, DM_RD_DATA);
-     end
-
+   initial begin
+	   #20 $display("             Time   | CLK | IM_ADDR    | IM_DATA    | DM_WE | DM_ADDR    | DM_WR_DATA | DM_RD_DATA |");
+	   $display("             ====== | === | ========== | ========== | ===== | ========== | ========== |");
+      
+	   $monitor($time,"| 0x%x | 0x%x | 0x%x |  0x%x  | 0x%x | 0x%x | 0x%x |",
+               CLK, IM_ADDR, IM_DATA, DM_WE, DM_ADDR, DM_WR_DATA, DM_RD_DATA);
+   end
+   
    // do your thing
    initial begin
 	   // reset operation
@@ -60,28 +59,23 @@ module mips_test;
 	   #100 reset__R<=1;
       
       // drive the f2d with consecutibe inputs from the memory
-      forever
-	     begin
-           #100 CLK <= 1;
-           IM_DATA  <= inst_mem[IM_ADDR>>2];
-           if (DM_WE)
-             begin
-                data_mem[DM_ADDR>>2] = DM_WR_DATA;
-                $fdisplay(log_chan, "at: %d writing %d to %d", 
-                          $time,  DM_WR_DATA, DM_ADDR);
-                
-                #100 CLK <= 0;
-             end
-           else
-             begin 
-                #20 if (DM_ADDR > 8'hff)
-                  DM_RD_DATA <= 32'hffffffff;
-                else
-                  DM_RD_DATA <= data_mem[DM_ADDR>>2];
-                #80 CLK <= 0;
-             end
-	     end
+      forever begin
+         #100 CLK <= 1;
+         IM_DATA  <= inst_mem[IM_ADDR>>2];
+         if (DM_WE)
+           begin
+              data_mem[DM_ADDR>>2] = DM_WR_DATA;
+              $fdisplay(log_chan, "at: %d writing %d to %d", 
+                        $time,  DM_WR_DATA, DM_ADDR);
+              #100 CLK <= 0;
+           end else begin 
+              #20 if (DM_ADDR > 8'hff)
+                DM_RD_DATA <= 32'hffffffff;
+              else
+                DM_RD_DATA <= data_mem[DM_ADDR>>2];
+              #80 CLK <= 0;
+           end
+	   end
    end 
-   
 endmodule
 
