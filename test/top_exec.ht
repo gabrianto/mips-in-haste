@@ -1,0 +1,24 @@
+#include "types.ht"
+#include "execute.ht"
+
+
+//& execute: proc(d2e?chan d2e_type & m2e?chan m2e_type & e2m!chan e2m_type) . import
+// & execute: proc(d2e?chan d2e_type & e2m!chan e2m_type) . import
+
+& top_exec: main proc(d2e_top?chan d2e_type & e2m!chan e2m_type).
+begin
+// implementing another layer of pipes execute probes d2e and thus it cannot
+//  be used as top level interfaces
+& d2e:chan d2e_type
+& d2e_var: var d2e_type
+& w2e:chan w2e_type
+|
+   // top level connectivity
+   forever do
+   execute(d2e, w2e, e2m)
+   od
+   ||
+   forever do
+   d2e_top?d2e_var; d2e!d2e_var
+   od
+end
