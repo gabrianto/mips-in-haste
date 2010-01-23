@@ -1,0 +1,32 @@
+#include "types.ht"
+#include "memory.ht"
+#include "writeback.ht"
+ 
+//& writeback : proc(m2w?chan m2w_type & w2d!chan w2d_type &
+//                          w2e!chan w2e_type &
+//			  WM_CLK?wire USint1 &
+//			  WM_RD_DATA?wire data_type &
+//                       	  WM_RD_VALID?wire USint1) . import
+			  
+//& memory : 	proc(e2m?chan e2m_type & m2w!chan m2w_type &
+//                       m2d!chan m2d_type & m2e!chan m2e_type &
+//                       MM_CLK?wire USint1 &           
+//                       MM_WE!wire USint1 &           
+//                       MM_ADDR!wire addr_type &    
+//                       MM_WR_DATA!wire data_type ) . import			 
+
+& top_mem_wb: main 	proc(e2m?chan e2m_type &
+			M_CLK?wire USint1 &
+			M_WE!wire USint1 &           
+                       	M_ADDR!wire addr_type &    
+                       	M_WR_DATA!wire data_type & 
+		      w2d!chan w2d_type & w2e!chan w2e_type &
+		 	M_RD_DATA?wire data_type &
+                       	M_RD_VALID?wire USint1) . 
+			 
+
+begin
+& m2w:chan m2w_type
+|
+   memory(e2m, m2w, M_CLK, M_WE, M_ADDR, M_WR_DATA) || writeback(m2w, w2d, w2e, M_CLK, M_RD_DATA)
+end
